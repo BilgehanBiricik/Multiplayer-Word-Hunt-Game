@@ -10,7 +10,7 @@ import javafx.stage.Stage;
 public class WordHuntGameApp extends Application {
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         primaryStage.setScene(new Scene(launcher(primaryStage),  320, 150));
         primaryStage.setTitle("Kelime Avı Oyunu");
         primaryStage.show();
@@ -30,7 +30,7 @@ public class WordHuntGameApp extends Application {
         setUpGame.setPrefWidth(100);
         setUpGame.setOnAction(actionEvent -> {
             Stage setUpGameStage = new Stage();
-            setUpGameStage.setScene(new Scene(new SetUpGame(), 700, 250));
+            setUpGameStage.setScene(new Scene(new SetUpGame(), 600, 400));
             setUpGameStage.setTitle("Oyun Kur");
             setUpGameStage.show();
             ((Node)actionEvent.getSource()).getScene().getWindow().hide();

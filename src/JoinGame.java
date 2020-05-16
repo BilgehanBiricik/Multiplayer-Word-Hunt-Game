@@ -1,3 +1,4 @@
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
@@ -13,6 +14,8 @@ public class JoinGame extends BorderPane {
         TextField txtFieldUsername = new TextField();
         Button btnJoinGame = new Button("Katıl");
 
+
+        btnJoinGame.setPrefWidth(100);
         btnJoinGame.setOnAction(actionEvent -> {
 
         });
@@ -27,7 +30,7 @@ public class JoinGame extends BorderPane {
         gridPane.add(btnJoinGame, 1, 3);
 
         gridPane.setAlignment(Pos.CENTER);
-        gridPane.setGridLinesVisible(true);
+        gridPane.setGridLinesVisible(false);
         gridPane.setVgap(10);
         gridPane.setHgap(10);
         super.setCenter(gridPane);
