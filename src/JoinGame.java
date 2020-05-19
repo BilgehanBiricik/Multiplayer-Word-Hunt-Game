@@ -1,7 +1,4 @@
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
@@ -15,7 +12,7 @@ public class JoinGame extends BorderPane {
 
     private WHGPClient whgpClient;
 
-    public JoinGame() {
+    public JoinGame(Stage parentStage) {
         TextField txtFieldIp = new TextField();
         TextField txtFieldPort = new TextField();
         TextField txtFieldUsername = new TextField();
@@ -25,13 +22,17 @@ public class JoinGame extends BorderPane {
         btnJoinGame.setPrefWidth(100);
         btnJoinGame.setOnAction(actionEvent -> {
             try {
+                MessageHandler.parentStage = parentStage;
                 whgpClient = new WHGPClient(txtFieldIp.getText(), txtFieldPort.getText());
                 whgpClient.joinGame(txtFieldUsername.getText());
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            ((Node) actionEvent.getSource()).getScene().getWindow().hide();
         });
+
+        txtFieldUsername.setText("bilgehan");
+        txtFieldIp.setText("localhost");
+        txtFieldPort.setText("5555");
 
         GridPane gridPane = new GridPane();
         gridPane.add(new Text("Kullanıcı Adı: "), 0, 0);

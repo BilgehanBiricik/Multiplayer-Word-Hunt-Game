@@ -1,5 +1,6 @@
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -21,6 +22,7 @@ public class WordHuntGame {
     public static ArrayList<ArrayList<Tile>> tileArrayLists;
 
     private GameInfo gameInfo;
+    private WHGPClient whgpClient;
 
     private GridPane gameAreaPane;
     private VBox gameInfoPane;
@@ -98,6 +100,11 @@ public class WordHuntGame {
         text2.setFill(Color.DARKBLUE);
         text2.setFont(Font.font("Arial", FontWeight.BOLD, 16));
 
+        Button btnStartGame = new Button("Oyunu başlat");
+        btnStartGame.setOnAction(actionEvent -> {
+
+        });
+
         gridPane.add(text, 0, 0);
         gridPane.add(new Text("Oyun Alanı: "), 0, 2);
         gridPane.add(new Text(gameInfo.getGameAreaX() + "x" + gameInfo.getGameAreaY()), 1, 2);
@@ -112,6 +119,7 @@ public class WordHuntGame {
 
         playerListPane.add(text2, 0, 0);
         playerListPane.add(listView, 0, 2);
+        playerListPane.add(btnStartGame, 0, 4);
 
         gridPane.setHgap(15);
         gridPane.setVgap(15);
@@ -151,5 +159,13 @@ public class WordHuntGame {
 
     public void setGameInfo(GameInfo gameInfo) {
         this.gameInfo = gameInfo;
+    }
+
+    public WHGPClient getWhgpClient() {
+        return whgpClient;
+    }
+
+    public void setWhgpClient(WHGPClient whgpClient) {
+        this.whgpClient = whgpClient;
     }
 }

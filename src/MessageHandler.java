@@ -1,5 +1,6 @@
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 public class MessageHandler extends Thread {
     private ObjectInputStream in;
     private WHGPClient whgpClient;
+    public static Stage parentStage;
 
     public MessageHandler(ObjectInputStream in, WHGPClient whgpClient) {
         this.in = in;
@@ -42,11 +44,32 @@ public class MessageHandler extends Thread {
                                         Arrays.asList(gameInfoList.get(4).split("#")).stream().map(s -> Integer.parseInt(s)).collect(Collectors.toCollection(ArrayList::new)),
                                         Arrays.asList(gameInfoList.get(5).split("#")).stream().map(s -> Integer.parseInt(s)).collect(Collectors.toCollection(ArrayList::new)),
                                         Arrays.asList(gameInfoList.get(6).split("#")).stream().map(s -> Integer.parseInt(s)).collect(Collectors.toCollection(ArrayList::new))));
+                                WordHuntGame.getInstance().setWhgpClient(whgpClient);
 
                                 Stage wordHuntGameStage = new Stage();
                                 wordHuntGameStage.setScene(new Scene(WordHuntGame.getInstance().loadGameScene(), 1100, 900));
                                 wordHuntGameStage.setTitle("Kelime Avı Oyunu");
                                 wordHuntGameStage.show();
+                                parentStage.close();
+                            });
+                            break;
+                        case USERNAME_EXIST:
+                            Platform.runLater(() -> {
+                                List<String> messageList = Arrays.asList(message.getMessage().split(";"));
+                                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                                alert.setHeaderText(messageList.get(0));
+                                alert.setContentText(messageList.get(1));
+                                alert.show();
+
+                            });
+                            break;
+                        case GAME_IS_STARTED:
+                            Platform.runLater(() -> {
+                                List<String> messageList = Arrays.asList(message.getMessage().split(";"));
+                                Alert alert = new Alert(Alert.AlertType.WARNING);
+                                alert.setHeaderText(messageList.get(0));
+                                alert.setContentText(messageList.get(1));
+                                alert.show();
                             });
                             break;
                     }

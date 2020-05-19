@@ -30,20 +30,20 @@ public class WordHuntGameApp extends Application {
         setUpGame.setPrefWidth(100);
         setUpGame.setOnAction(actionEvent -> {
             Stage setUpGameStage = new Stage();
-            setUpGameStage.setScene(new Scene(new SetUpGame(), 600, 400));
+            setUpGameStage.setScene(new Scene(new SetUpGame(setUpGameStage), 600, 400));
             setUpGameStage.setTitle("Oyun Kur");
             setUpGameStage.show();
-            ((Node)actionEvent.getSource()).getScene().getWindow().hide();
+            parentStage.close();
         });
 
         joinGame = new Button("Oyuna Katıl");
         joinGame.setPrefWidth(100);
         joinGame.setOnAction(actionEvent -> {
             Stage joinGameStage = new Stage();
-            joinGameStage.setScene(new Scene(new JoinGame(), 300, 150));
+            joinGameStage.setScene(new Scene(new JoinGame(joinGameStage), 350, 200));
             joinGameStage.setTitle("Oyuna Katıl");
             joinGameStage.show();
-            ((Node)actionEvent.getSource()).getScene().getWindow().hide();
+            parentStage.close();
         });
 
         vbox.setAlignment(Pos.CENTER);

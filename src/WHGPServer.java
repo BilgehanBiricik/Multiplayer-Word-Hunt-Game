@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 public class WHGPServer extends Thread {
 
-    private String username;
     private String ip;
     private String port;
 
@@ -20,8 +19,7 @@ public class WHGPServer extends Thread {
 
     static Game game;
 
-    public WHGPServer(String username, String ip, String port) {
-        this.username = username;
+    public WHGPServer(String ip, String port) {
         this.ip = ip;
         this.port = port;
     }

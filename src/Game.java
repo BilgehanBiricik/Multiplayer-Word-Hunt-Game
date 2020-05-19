@@ -6,13 +6,15 @@ public class Game {
 
     private PlayerHandler turn;
     private PlayerHandler confirmPlayer;
-    private PlayerHandler[] playerList;
 
     private String currentClient;
 
     private static ArrayList<ArrayList<Tile>> tileArrayLists;
 
+    private boolean isGameStarted;
+
     public Game() {
+        isGameStarted = false;
     }
 
     public GameInfo getGameInfo() {
@@ -21,5 +23,13 @@ public class Game {
 
     public void setGameInfo(GameInfo gameInfo) {
         this.gameInfo = gameInfo;
+    }
+
+    public boolean isGameStarted() {
+        return isGameStarted;
+    }
+
+    public void setGameStarted(boolean gameStarted) {
+        isGameStarted = gameStarted;
     }
 }

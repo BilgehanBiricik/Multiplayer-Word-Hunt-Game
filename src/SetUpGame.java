@@ -1,6 +1,4 @@
 import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -9,10 +7,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 
 public class SetUpGame extends BorderPane {
@@ -45,7 +40,7 @@ public class SetUpGame extends BorderPane {
     private ArrayList<Integer> x2TilesPositions = new ArrayList<>();
     private ArrayList<Integer> x3TilesPositions = new ArrayList<>();
 
-    public SetUpGame() {
+    public SetUpGame(Stage parentStage) {
 
         txtFieldGameAreaX.setMaxWidth(50);
         txtFieldGameAreaY.setMaxWidth(50);
@@ -64,7 +59,8 @@ public class SetUpGame extends BorderPane {
 
             if (checkRules()) {
                 try {
-                    whgpServer = new WHGPServer(txtFieldUsername.getText(), txtFieldIp.getText(), txtFieldPort.getText());
+                    MessageHandler.parentStage = parentStage;
+                    whgpServer = new WHGPServer(txtFieldIp.getText(), txtFieldPort.getText());
                     whgpServer.start();
                     whgpClient = new WHGPClient(txtFieldIp.getText(), txtFieldPort.getText());
                     whgpClient.initializeGame(txtFieldUsername.getText(), new GameInfo(gameAreaX, gameAreaY, maxPoint, totalGame,
@@ -72,11 +68,6 @@ public class SetUpGame extends BorderPane {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-//                Stage wordHuntGameStage = new Stage();
-//                wordHuntGameStage.setScene(new Scene(WordHuntGame.getInstance().loadGameScene(), 1100, 900));
-//                wordHuntGameStage.setTitle("Kelime Avı Oyunu");
-//                wordHuntGameStage.show();
-                ((Node) actionEvent.getSource()).getScene().getWindow().hide();
             }
 
         });

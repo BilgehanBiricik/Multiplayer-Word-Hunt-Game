@@ -1,3 +1,5 @@
+import javafx.stage.Stage;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -6,7 +8,6 @@ import java.net.Socket;
 public class WHGPClient {
 
     Socket socket;
-    private String username;
     private ObjectInputStream in;
     private ObjectOutputStream out;
 
@@ -27,6 +28,10 @@ public class WHGPClient {
 
     public void joinGame(String username) throws IOException {
        write(new WHGPMessage(WHGPMessageType.JOIN_REQUEST, username));
+    }
+
+    public void startGame() throws IOException {
+        write(new WHGPMessage(WHGPMessageType.START_GAME, ""));
     }
 
     void write(WHGPMessage message) throws IOException {
