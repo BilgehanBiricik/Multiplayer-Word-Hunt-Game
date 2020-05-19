@@ -3,15 +3,14 @@ import java.util.ArrayList;
 public class Game {
 
     private GameInfo gameInfo;
+    private boolean isGameStarted;
 
     private PlayerHandler turn;
-    private PlayerHandler confirmPlayer;
 
     private String currentClient;
 
     private static ArrayList<ArrayList<Tile>> tileArrayLists;
 
-    private boolean isGameStarted;
 
     public Game() {
         isGameStarted = false;

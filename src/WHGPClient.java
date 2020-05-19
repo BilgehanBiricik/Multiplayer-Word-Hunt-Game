@@ -22,16 +22,31 @@ public class WHGPClient {
     }
 
     public void initializeGame(String username, GameInfo gameInfo) throws IOException {
-        write(new WHGPMessage(WHGPMessageType.INITIALIZE_GAME, username));
-        write(new WHGPMessage(WHGPMessageType.SET_GAME_INFO, gameInfo.printGameInfo()));
+//        write(new WHGPMessage(WHGPMessageType.INITIALIZE_GAME, username));
+//        write(new WHGPMessage(WHGPMessageType.SET_GAME_INFO, gameInfo.printGameInfo()));
+        WHGPMessage msg = new WHGPMessage();
+        msg.setWhgpMessageType(WHGPMessageType.INITIALIZE_GAME);
+        msg.setMessage(username);
+        write(msg);
+
+        msg = new WHGPMessage();
+        msg.setWhgpMessageType(WHGPMessageType.SET_GAME_INFO);
+        msg.setGameInfo(gameInfo);
+        write(msg);
     }
 
     public void joinGame(String username) throws IOException {
-       write(new WHGPMessage(WHGPMessageType.JOIN_REQUEST, username));
+        WHGPMessage msg = new WHGPMessage();
+        msg.setWhgpMessageType(WHGPMessageType.JOIN_REQUEST);
+        msg.setMessage(username);
+        write(msg);
     }
 
     public void startGame() throws IOException {
-        write(new WHGPMessage(WHGPMessageType.START_GAME, ""));
+        WHGPMessage msg = new WHGPMessage();
+        msg.setWhgpMessageType(WHGPMessageType.START_GAME);
+        msg.setGameStarted(true);
+        write(msg);
     }
 
     void write(WHGPMessage message) throws IOException {

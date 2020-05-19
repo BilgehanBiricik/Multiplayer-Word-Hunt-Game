@@ -52,7 +52,10 @@ public class PlayerHandler extends Thread {
                                 WHGPServer.hostName = playerName;
 
                                 try {
-                                    write(new WHGPMessage(WHGPMessageType.PLAYER_JOINED, PlayerManager.getInstance().printAllPlayers()));
+                                    WHGPMessage msg = new WHGPMessage();
+                                    msg.setWhgpMessageType(WHGPMessageType.PLAYER_JOINED);
+                                    msg.setPlayerList(PlayerManager.getInstance().printAllPlayers());
+                                    write(msg);
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
@@ -60,13 +63,13 @@ public class PlayerHandler extends Thread {
                             }
                             break;
                         case SET_GAME_INFO:
-                            List<String> gameInfoList = Arrays.asList(message.getMessage().split(";"));
-                            WHGPServer.game.setGameInfo(new GameInfo(Integer.parseInt(gameInfoList.get(0)), Integer.parseInt(gameInfoList.get(1)), Integer.parseInt(gameInfoList.get(2)), Integer.parseInt(gameInfoList.get(3)),
-                                    Arrays.asList(gameInfoList.get(4).split("#")).stream().map(s -> Integer.parseInt(s)).collect(Collectors.toCollection(ArrayList::new)),
-                                    Arrays.asList(gameInfoList.get(5).split("#")).stream().map(s -> Integer.parseInt(s)).collect(Collectors.toCollection(ArrayList::new)),
-                                    Arrays.asList(gameInfoList.get(6).split("#")).stream().map(s -> Integer.parseInt(s)).collect(Collectors.toCollection(ArrayList::new))));
+                            WHGPServer.game.setGameInfo(message.getGameInfo());
                             try {
-                                write(new WHGPMessage(WHGPMessageType.GET_GAME_INFO, WHGPServer.game.getGameInfo().printGameInfo()));
+                                WHGPMessage msg = new WHGPMessage();
+                                msg.setWhgpMessageType(WHGPMessageType.GET_GAME_INFO);
+                                msg.setGameInfo(WHGPServer.game.getGameInfo());
+                                msg.setPlayerHost(getPlayerName() == WHGPServer.hostName);
+                                write(msg);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -83,25 +86,40 @@ public class PlayerHandler extends Thread {
                                     PlayerManager.playerList.add(playerName);
 
                                     try {
-                                        PlayerManager.getInstance().sendToPlayers(new WHGPMessage(WHGPMessageType.PLAYER_JOINED, PlayerManager.getInstance().printAllPlayers()));
-                                        write(new WHGPMessage(WHGPMessageType.GET_GAME_INFO, WHGPServer.game.getGameInfo().printGameInfo()));
+                                        WHGPMessage msg = new WHGPMessage();
+                                        msg.setWhgpMessageType(WHGPMessageType.PLAYER_JOINED);
+                                        msg.setPlayerList(PlayerManager.getInstance().printAllPlayers());
+                                        PlayerManager.getInstance().sendToPlayers(msg);
+
+                                        msg = new WHGPMessage();
+                                        msg.setWhgpMessageType(WHGPMessageType.GET_GAME_INFO);
+                                        msg.setGameInfo(WHGPServer.game.getGameInfo());
+                                        write(msg);
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
 
                                 } else {
                                     try {
-                                        write(new WHGPMessage(WHGPMessageType.USERNAME_EXIST, "Kullanıcı Adı Mevcut;Böyle bir kullanıcı adı mevcut. Lütfen farklı bir isim giriniz."));
+                                        WHGPMessage msg = new WHGPMessage();
+                                        msg.setWhgpMessageType(WHGPMessageType.USERNAME_EXIST);
+                                        msg.setMessageHeader("Kullanıcı Adı Mevcut");
+                                        msg.setMessage("Böyle bir kullanıcı adı mevcut. Lütfen farklı bir isim giriniz.");
+                                        write(msg);
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
                                 }
                             } else {
-                                write(new WHGPMessage(WHGPMessageType.GAME_IS_STARTED, "Oyun Başladı;Oyun şuan da oynanmakta olduğu için giriş yapamazsınız!"));
+                                WHGPMessage msg = new WHGPMessage();
+                                msg.setWhgpMessageType(WHGPMessageType.GAME_IS_STARTED);
+                                msg.setMessageHeader("Oyun Başladı");
+                                msg.setMessage("Oyun şuan da oynanmakta olduğu için giriş yapamazsınız!");
+                                write(msg);
                             }
                             break;
                         case START_GAME:
-
+                            WHGPServer.game.setGameStarted(true);
                             break;
                     }
 

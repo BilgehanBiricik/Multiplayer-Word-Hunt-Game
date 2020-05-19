@@ -39,12 +39,12 @@ public class PlayerManager {
         return players;
     }
 
-    public String printAllPlayers() {
-        StringBuilder s = new StringBuilder();
+    public List<String> printAllPlayers() {
+        List<String> tmp = new ArrayList<>();
         for (PlayerHandler ph: players) {
-            s.append(ph.getPlayerName()).append(" ").append("(Puan: ").append(ph.getPlayerPoint()).append(" - Skor: ").append(ph.getPlayerScore()).append(")#");
+            tmp.add(ph.getPlayerName() + " (Puan: " + ph.getPlayerPoint() + " - Skor: " + ph.getPlayerScore() + ")");
         }
-        return s.toString();
+        return tmp;
     }
 
     public synchronized ArrayList<String> getPlayerList() {

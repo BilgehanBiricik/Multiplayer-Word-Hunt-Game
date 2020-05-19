@@ -1,21 +1,24 @@
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.List;
 
 public class WHGPMessage implements Serializable {
     private WHGPMessageType whgpMessageType;
     private String messageHeader;
     private String message;
-    private ArrayList<String> playerList;
+    private List<String> playerList;
     private GameInfo gameInfo;
     private boolean isGameStarted;
+    private boolean isPlayerHost;
 
-    public WHGPMessage(WHGPMessageType whgpMessageType, String message) {
-        this.whgpMessageType = whgpMessageType;
-        this.message = message;
+    public WHGPMessage() {
     }
-
+    
     public WHGPMessageType getWhgpMessageType() {
         return whgpMessageType;
+    }
+
+    public void setWhgpMessageType(WHGPMessageType whgpMessageType) {
+        this.whgpMessageType = whgpMessageType;
     }
 
     public String getMessage() {
@@ -34,11 +37,11 @@ public class WHGPMessage implements Serializable {
         this.messageHeader = messageHeader;
     }
 
-    public ArrayList<String> getPlayerList() {
+    public List<String> getPlayerList() {
         return playerList;
     }
 
-    public void setPlayerList(ArrayList<String> playerList) {
+    public void setPlayerList(List<String> playerList) {
         this.playerList = playerList;
     }
 
@@ -56,5 +59,13 @@ public class WHGPMessage implements Serializable {
 
     public void setGameStarted(boolean gameStarted) {
         isGameStarted = gameStarted;
+    }
+
+    public boolean isPlayerHost() {
+        return isPlayerHost;
+    }
+
+    public void setPlayerHost(boolean playerHost) {
+        isPlayerHost = playerHost;
     }
 }

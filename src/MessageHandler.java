@@ -5,15 +5,11 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class MessageHandler extends Thread {
     private ObjectInputStream in;
     private WHGPClient whgpClient;
-    public static Stage parentStage;
+    private static Stage parentStage;
 
     public MessageHandler(ObjectInputStream in, WHGPClient whgpClient) {
         this.in = in;
@@ -32,19 +28,15 @@ public class MessageHandler extends Thread {
                     switch (finalMessage.getWhgpMessageType()) {
                         case PLAYER_JOINED:
                             Platform.runLater(() -> {
-                                List<String> playerList = Arrays.asList(finalMessage.getMessage().split("#"));
-                                WordHuntGame.getInstance().getListView().getItems().setAll(playerList);
+                                WordHuntGame.getInstance().getListView().getItems().setAll(finalMessage.getPlayerList());
                             });
                             break;
                         case GET_GAME_INFO:
                             Platform.runLater(() ->
                             {
-                                List<String> gameInfoList = Arrays.asList(finalMessage.getMessage().split(";"));
-                                WordHuntGame.getInstance().setGameInfo(new GameInfo(Integer.parseInt(gameInfoList.get(0)), Integer.parseInt(gameInfoList.get(1)), Integer.parseInt(gameInfoList.get(2)), Integer.parseInt(gameInfoList.get(3)),
-                                        Arrays.asList(gameInfoList.get(4).split("#")).stream().map(s -> Integer.parseInt(s)).collect(Collectors.toCollection(ArrayList::new)),
-                                        Arrays.asList(gameInfoList.get(5).split("#")).stream().map(s -> Integer.parseInt(s)).collect(Collectors.toCollection(ArrayList::new)),
-                                        Arrays.asList(gameInfoList.get(6).split("#")).stream().map(s -> Integer.parseInt(s)).collect(Collectors.toCollection(ArrayList::new))));
+                                WordHuntGame.getInstance().setGameInfo(finalMessage.getGameInfo());
                                 WordHuntGame.getInstance().setWhgpClient(whgpClient);
+                                WordHuntGame.getInstance().getBtnStartGame().setVisible(message.isPlayerHost());
 
                                 Stage wordHuntGameStage = new Stage();
                                 wordHuntGameStage.setScene(new Scene(WordHuntGame.getInstance().loadGameScene(), 1100, 900));
@@ -55,20 +47,18 @@ public class MessageHandler extends Thread {
                             break;
                         case USERNAME_EXIST:
                             Platform.runLater(() -> {
-                                List<String> messageList = Arrays.asList(message.getMessage().split(";"));
                                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                                alert.setHeaderText(messageList.get(0));
-                                alert.setContentText(messageList.get(1));
+                                alert.setHeaderText(finalMessage.getMessageHeader());
+                                alert.setContentText(finalMessage.getMessage());
                                 alert.show();
 
                             });
                             break;
                         case GAME_IS_STARTED:
                             Platform.runLater(() -> {
-                                List<String> messageList = Arrays.asList(message.getMessage().split(";"));
                                 Alert alert = new Alert(Alert.AlertType.WARNING);
-                                alert.setHeaderText(messageList.get(0));
-                                alert.setContentText(messageList.get(1));
+                                alert.setHeaderText(finalMessage.getMessageHeader());
+                                alert.setContentText(finalMessage.getMessage());
                                 alert.show();
                             });
                             break;
@@ -81,5 +71,13 @@ public class MessageHandler extends Thread {
             e.printStackTrace();
         }
 
+    }
+
+    public static Stage getParentStage() {
+        return parentStage;
+    }
+
+    public static void setParentStage(Stage parentStage) {
+        MessageHandler.parentStage = parentStage;
     }
 }

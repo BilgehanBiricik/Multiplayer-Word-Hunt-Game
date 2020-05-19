@@ -10,6 +10,7 @@ import javafx.scene.text.Text;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Scanner;
@@ -29,10 +30,12 @@ public class WordHuntGame {
     private HBox gameHandPane;
 
     private ListView<String> listView;
+    private Button btnStartGame;
 
     private WordHuntGame() {
         gameInfo = new GameInfo();
         listView = new ListView<>();
+        btnStartGame = new Button("Oyunu Başlat");
     }
 
     public static WordHuntGame getInstance() {
@@ -100,9 +103,13 @@ public class WordHuntGame {
         text2.setFill(Color.DARKBLUE);
         text2.setFont(Font.font("Arial", FontWeight.BOLD, 16));
 
-        Button btnStartGame = new Button("Oyunu başlat");
         btnStartGame.setOnAction(actionEvent -> {
-
+            try {
+                whgpClient.startGame();
+                btnStartGame.setDisable(true);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         });
 
         gridPane.add(text, 0, 0);
@@ -167,5 +174,13 @@ public class WordHuntGame {
 
     public void setWhgpClient(WHGPClient whgpClient) {
         this.whgpClient = whgpClient;
+    }
+
+    public Button getBtnStartGame() {
+        return btnStartGame;
+    }
+
+    public void setBtnStartGame(Button btnStartGame) {
+        this.btnStartGame = btnStartGame;
     }
 }

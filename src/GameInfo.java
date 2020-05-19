@@ -1,6 +1,7 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class GameInfo {
+public class GameInfo implements Serializable {
     private int gameAreaX;
     private int gameAreaY;
     private int maxPoint;
