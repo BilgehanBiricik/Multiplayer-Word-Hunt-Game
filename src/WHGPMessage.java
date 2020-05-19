@@ -1,9 +1,8 @@
-public class WHGPMessage {
+import java.io.Serializable;
+
+public class WHGPMessage implements Serializable {
     private WHGPMessageType whgpMessageType;
     private String message;
-
-    public WHGPMessage() {
-    }
 
     public WHGPMessage(WHGPMessageType whgpMessageType, String message) {
         this.whgpMessageType = whgpMessageType;

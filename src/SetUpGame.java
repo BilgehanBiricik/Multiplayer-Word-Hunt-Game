@@ -8,6 +8,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -15,6 +16,9 @@ import java.util.List;
 
 
 public class SetUpGame extends BorderPane {
+
+    private WHGPClient whgpClient;
+    private WHGPServer whgpServer;
 
     private TextField txtFieldGameAreaX = new TextField();
     private TextField txtFieldGameAreaY = new TextField();
@@ -39,7 +43,7 @@ public class SetUpGame extends BorderPane {
 
     private ArrayList<Integer> unavailableTilesPositions = new ArrayList<>();
     private ArrayList<Integer> x2TilesPositions = new ArrayList<>();
-    private ArrayList<Integer> x3TilesPositions =  new ArrayList<>();
+    private ArrayList<Integer> x3TilesPositions = new ArrayList<>();
 
     public SetUpGame() {
 
@@ -59,23 +63,34 @@ public class SetUpGame extends BorderPane {
         btnSetUpGame.setOnAction(actionEvent -> {
 
             if (checkRules()) {
-                Stage wordHuntGameStage = new Stage();
-                wordHuntGameStage.setScene(new Scene(new WordHuntGame(gameAreaX,
-                        gameAreaY,
-                        maxPoint,
-                        totalGame,
-                        txtFieldUsername.getText(),
-                        txtFieldIp.getText(),
-                        txtFieldPort.getText(),
-                        unavailableTilesPositions,
-                        x2TilesPositions,
-                        x3TilesPositions), 1100, 900));
-                wordHuntGameStage.setTitle("Kelime Avı Oyunu");
-                wordHuntGameStage.show();
+                try {
+                    whgpServer = new WHGPServer(txtFieldUsername.getText(), txtFieldIp.getText(), txtFieldPort.getText());
+                    whgpServer.start();
+                    whgpClient = new WHGPClient(txtFieldIp.getText(), txtFieldPort.getText());
+                    whgpClient.initializeGame(txtFieldUsername.getText(), new GameInfo(gameAreaX, gameAreaY, maxPoint, totalGame,
+                            unavailableTilesPositions, x2TilesPositions, x3TilesPositions));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+//                Stage wordHuntGameStage = new Stage();
+//                wordHuntGameStage.setScene(new Scene(WordHuntGame.getInstance().loadGameScene(), 1100, 900));
+//                wordHuntGameStage.setTitle("Kelime Avı Oyunu");
+//                wordHuntGameStage.show();
                 ((Node) actionEvent.getSource()).getScene().getWindow().hide();
             }
 
         });
+
+        txtFieldGameAreaX.setText("16");
+        txtFieldGameAreaY.setText("16");
+        txtFieldUnAvailableRegions.setText("20");
+        txtFieldMaxPoint.setText("200");
+        txtFieldTotalGame.setText("5");
+        txtField3X.setText("5");
+        txtField2X.setText("5");
+        txtFieldUsername.setText("bilgehan");
+        txtFieldIp.setText("localhost");
+        txtFieldPort.setText("5555");
 
         GridPane gridPane = new GridPane();
         gridPane.add(new Text("Oyun Alanı X: "), 0, 0);
@@ -130,8 +145,10 @@ public class SetUpGame extends BorderPane {
 
         boolean checkMaxPoint = (gameArea - unavailableRegions) < (gameArea);
         boolean checkUnavailableRegions = (unavailableRegions < (int) (gameArea * 0.1));
+        boolean checkSumOfSpecialTiles = (unavailableRegions + x3Tiles + x2Tiles) < gameArea;
+        boolean checkSumOfGameAreaAxises = gameAreaX == gameAreaY;
 
-        if (!checkMaxPoint || !checkUnavailableRegions)
+        if (!checkMaxPoint || !checkUnavailableRegions || !checkSumOfSpecialTiles || !checkSumOfGameAreaAxises)
             return false;
 
         maxPoint = Integer.parseInt(txtFieldMaxPoint.getText());

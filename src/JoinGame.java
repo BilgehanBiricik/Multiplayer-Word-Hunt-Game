@@ -1,12 +1,19 @@
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
+
+import java.io.IOException;
 
 public class JoinGame extends BorderPane {
+
+    private WHGPClient whgpClient;
 
     public JoinGame() {
         TextField txtFieldIp = new TextField();
@@ -17,7 +24,13 @@ public class JoinGame extends BorderPane {
 
         btnJoinGame.setPrefWidth(100);
         btnJoinGame.setOnAction(actionEvent -> {
-
+            try {
+                whgpClient = new WHGPClient(txtFieldIp.getText(), txtFieldPort.getText());
+                whgpClient.joinGame(txtFieldUsername.getText());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            ((Node) actionEvent.getSource()).getScene().getWindow().hide();
         });
 
         GridPane gridPane = new GridPane();

@@ -6,7 +6,6 @@ public class Tile extends Button {
     private String state;
 
     public Tile() {
-
         super.setPrefWidth(40);
         super.setPrefHeight(40);
         super.setText(String.valueOf(position));
