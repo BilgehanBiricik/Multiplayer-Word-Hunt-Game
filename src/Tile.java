@@ -1,16 +1,15 @@
 import javafx.scene.control.Button;
 
-public class Tile extends Button {
+import java.io.Serializable;
+
+public class Tile implements Serializable {
     private String letter;
     private int position;
-    private String state;
+    private TileType tileType;
 
     public Tile() {
-        super.setPrefWidth(40);
-        super.setPrefHeight(40);
-        super.setText(String.valueOf(position));
+        this.tileType = TileType.NORMAL;
     }
-
 
     public String getLetter() {
         return letter;
@@ -28,17 +27,11 @@ public class Tile extends Button {
         this.position = position;
     }
 
-    public String getState() {
-        return state;
+    public TileType getTileType() {
+        return tileType;
     }
 
-    public void setState(String state) {
-        this.state = state;
-        if (state.equals("unavailable"))
-            super.setStyle("-fx-background-color: black");
-        else if (state.equals("2x"))
-            super.setStyle("-fx-background-color: yellow");
-        else if (state.equals("3x"))
-            super.setStyle("-fx-background-color: green");
+    public void setTileType(TileType tileType) {
+        this.tileType = tileType;
     }
 }

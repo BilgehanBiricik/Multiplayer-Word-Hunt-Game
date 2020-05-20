@@ -20,7 +20,6 @@ public class WordHuntGame {
     public static WordHuntGame wordHuntGame;
 
     public static ArrayList<String> dictionary;
-    public static ArrayList<ArrayList<Tile>> tileArrayLists;
 
     private GameInfo gameInfo;
     private WHGPClient whgpClient;
@@ -36,6 +35,7 @@ public class WordHuntGame {
         gameInfo = new GameInfo();
         listView = new ListView<>();
         btnStartGame = new Button("Oyunu Başlat");
+        gameAreaPane = new GridPane();
     }
 
     public static WordHuntGame getInstance() {
@@ -52,7 +52,7 @@ public class WordHuntGame {
         gameInfoPane.setStyle("-fx-border-color: red");
         borderPane.setLeft(gameInfoPane);
 
-        gameAreaPane = loadGameArea();
+        gameAreaPane.setAlignment(Pos.CENTER);
         borderPane.setCenter(gameAreaPane);
 
         VBox vBottom = new VBox();
@@ -62,31 +62,19 @@ public class WordHuntGame {
         return borderPane;
     }
 
-    private GridPane loadGameArea() {
-        tileArrayLists = new ArrayList<>();
-        GridPane gridPane = new GridPane();
-        for (int i = 0; i < gameInfo.getGameAreaX(); i++) {
-            tileArrayLists.add(new ArrayList<>());
-            for (int j = 0; j < gameInfo.getGameAreaY(); j++) {
-                int position = i * gameInfo.getGameAreaX() + j;
-                Tile tile = new Tile();
-                if (gameInfo.getUnavailableTilesPositions().contains(position))
-                    tile.setState("unavailable");
-                if (gameInfo.getX2TilesPositions().contains(position))
-                    tile.setState("2x");
-                if (gameInfo.getX3TilesPositions().contains(position))
-                    tile.setState("3x");
-
-                tile.setPosition(position);
-                tile.setText(String.valueOf(position));
-                tileArrayLists.get(i).add(tile);
-                gridPane.add(tile, j, i);
-            }
-        }
-
-        gridPane.setAlignment(Pos.CENTER);
-        return gridPane;
-    }
+//    private GridPane loadGameArea() {
+//        GridPane gridPane = new GridPane();
+//        if(tileGrid.size() > 0) {
+//            for (int i = 0; i < gameInfo.getGameAreaX(); i++) {
+//                for (int j = 0; j < gameInfo.getGameAreaY(); j++) {
+//                    gridPane.add(tileGrid.get(i).get(j), j, i);
+//                }
+//            }
+//        }
+//
+//        gridPane.setAlignment(Pos.CENTER);
+//        return gridPane;
+//    }
 
     private VBox loadGameInfo() {
         VBox vBox = new VBox();
@@ -182,5 +170,13 @@ public class WordHuntGame {
 
     public void setBtnStartGame(Button btnStartGame) {
         this.btnStartGame = btnStartGame;
+    }
+
+    public GridPane getGameAreaPane() {
+        return gameAreaPane;
+    }
+
+    public void setGameAreaPane(GridPane gameAreaPane) {
+        this.gameAreaPane = gameAreaPane;
     }
 }

@@ -1,7 +1,7 @@
 public enum WHGPMessageType {
     INITIALIZE_GAME,
     SET_GAME_INFO,
-    GET_GAME_INFO,
+    GET_GAME_INFO, GET_TILE_GRID,
     JOIN_REQUEST,
     START_GAME,
     WORD,

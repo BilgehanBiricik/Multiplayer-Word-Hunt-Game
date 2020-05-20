@@ -1,12 +1,6 @@
-import javafx.application.Platform;
-
 import java.io.*;
-import java.lang.reflect.Array;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class PlayerHandler extends Thread {
     private int playerId;
@@ -32,7 +26,7 @@ public class PlayerHandler extends Thread {
 
         while (socket.isConnected()) {
             try {
-                WHGPMessage message = null;
+                WHGPMessage message;
                 message = (WHGPMessage) in.readObject();
                 if (message != null) {
                     switch (message.getWhgpMessageType()) {
@@ -48,14 +42,14 @@ public class PlayerHandler extends Thread {
                                 PlayerManager.getInstance().connectPlayer(this);
                                 PlayerManager.playerList.add(playerName);
 
-                                WHGPServer.game = new Game();
-                                WHGPServer.hostName = playerName;
+                                WHGPServer.setGame(new Game());
+                                WHGPServer.setHostName(playerName);
 
                                 try {
                                     WHGPMessage msg = new WHGPMessage();
                                     msg.setWhgpMessageType(WHGPMessageType.PLAYER_JOINED);
-                                    msg.setPlayerList(PlayerManager.getInstance().printAllPlayers());
-                                    write(msg);
+                                    msg.setPlayerList(PlayerManager.getInstance().printAllPlayersAndStats());
+                                    PlayerManager.getInstance().sendToPlayers(msg);
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
@@ -63,19 +57,43 @@ public class PlayerHandler extends Thread {
                             }
                             break;
                         case SET_GAME_INFO:
-                            WHGPServer.game.setGameInfo(message.getGameInfo());
+                            WHGPServer.getGame().setGameInfo(message.getGameInfo());
+                            WHGPServer.getGame().setTileArrayLists(new ArrayList<>());
+                            for (int i = 0; i < WHGPServer.getGame().getGameInfo().getGameAreaX(); i++) {
+                                WHGPServer.getGame().getTileArrayLists().add(new ArrayList<>());
+                                for (int j = 0; j < WHGPServer.getGame().getGameInfo().getGameAreaY(); j++) {
+                                    int position = i * WHGPServer.getGame().getGameInfo().getGameAreaX() + j;
+                                    Tile tile = new Tile();
+                                    if (WHGPServer.getGame().getGameInfo().getUnavailableTilesPositions().contains(position))
+                                        tile.setTileType(TileType.UNAVAILABLE);
+                                    if (WHGPServer.getGame().getGameInfo().getX2TilesPositions().contains(position))
+                                        tile.setTileType(TileType.X2);
+                                    if (WHGPServer.getGame().getGameInfo().getX3TilesPositions().contains(position))
+                                        tile.setTileType(TileType.X3);
+
+
+                                    tile.setPosition(position);
+                                    tile.setLetter(String.valueOf(position));
+                                    WHGPServer.getGame().getTileArrayLists().get(i).add(tile);
+                                }
+                            }
                             try {
                                 WHGPMessage msg = new WHGPMessage();
                                 msg.setWhgpMessageType(WHGPMessageType.GET_GAME_INFO);
-                                msg.setGameInfo(WHGPServer.game.getGameInfo());
-                                msg.setPlayerHost(getPlayerName() == WHGPServer.hostName);
+                                msg.setGameInfo(WHGPServer.getGame().getGameInfo());
+                                msg.setPlayerHost(getPlayerName().equals(WHGPServer.getHostName()));
+                                write(msg);
+
+                                msg = new WHGPMessage();
+                                msg.setWhgpMessageType(WHGPMessageType.GET_TILE_GRID);
+                                msg.setTileGird(WHGPServer.getGame().getTileArrayLists());
                                 write(msg);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
                             break;
                         case JOIN_REQUEST:
-                            if (!WHGPServer.game.isGameStarted()) {
+                            if (!WHGPServer.getGame().isGameStarted()) {
                                 if (!PlayerManager.playerList.contains(message.getMessage())) {
                                     setPlayerId(playerId);
                                     setPlayerName(message.getMessage());
@@ -88,12 +106,17 @@ public class PlayerHandler extends Thread {
                                     try {
                                         WHGPMessage msg = new WHGPMessage();
                                         msg.setWhgpMessageType(WHGPMessageType.PLAYER_JOINED);
-                                        msg.setPlayerList(PlayerManager.getInstance().printAllPlayers());
+                                        msg.setPlayerList(PlayerManager.getInstance().printAllPlayersAndStats());
                                         PlayerManager.getInstance().sendToPlayers(msg);
 
                                         msg = new WHGPMessage();
                                         msg.setWhgpMessageType(WHGPMessageType.GET_GAME_INFO);
-                                        msg.setGameInfo(WHGPServer.game.getGameInfo());
+                                        msg.setGameInfo(WHGPServer.getGame().getGameInfo());
+                                        write(msg);
+
+                                        msg = new WHGPMessage();
+                                        msg.setWhgpMessageType(WHGPMessageType.GET_TILE_GRID);
+                                        msg.setTileGird(WHGPServer.getGame().getTileArrayLists());
                                         write(msg);
                                     } catch (IOException e) {
                                         e.printStackTrace();
@@ -119,7 +142,7 @@ public class PlayerHandler extends Thread {
                             }
                             break;
                         case START_GAME:
-                            WHGPServer.game.setGameStarted(true);
+                            WHGPServer.getGame().setGameStarted(true);
                             break;
                     }
 

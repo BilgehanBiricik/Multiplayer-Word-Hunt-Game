@@ -1,4 +1,5 @@
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class WHGPMessage implements Serializable {
@@ -9,6 +10,7 @@ public class WHGPMessage implements Serializable {
     private GameInfo gameInfo;
     private boolean isGameStarted;
     private boolean isPlayerHost;
+    private ArrayList<ArrayList<Tile>> tileGird;
 
     public WHGPMessage() {
     }
@@ -67,5 +69,13 @@ public class WHGPMessage implements Serializable {
 
     public void setPlayerHost(boolean playerHost) {
         isPlayerHost = playerHost;
+    }
+
+    public ArrayList<ArrayList<Tile>> getTileGird() {
+        return tileGird;
+    }
+
+    public void setTileGird(ArrayList<ArrayList<Tile>> tileGird) {
+        this.tileGird = tileGird;
     }
 }

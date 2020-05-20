@@ -9,11 +9,12 @@ public class Game {
 
     private String currentClient;
 
-    private static ArrayList<ArrayList<Tile>> tileArrayLists;
+    private ArrayList<ArrayList<Tile>> tileArrayLists;
 
 
     public Game() {
         isGameStarted = false;
+        tileArrayLists = new ArrayList<>();
     }
 
     public GameInfo getGameInfo() {
@@ -30,5 +31,13 @@ public class Game {
 
     public void setGameStarted(boolean gameStarted) {
         isGameStarted = gameStarted;
+    }
+
+    public ArrayList<ArrayList<Tile>> getTileArrayLists() {
+        return tileArrayLists;
+    }
+
+    public void setTileArrayLists(ArrayList<ArrayList<Tile>> tileArrayLists) {
+        this.tileArrayLists = tileArrayLists;
     }
 }

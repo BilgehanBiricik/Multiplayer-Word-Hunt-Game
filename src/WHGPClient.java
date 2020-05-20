@@ -22,9 +22,7 @@ public class WHGPClient {
     }
 
     public void initializeGame(String username, GameInfo gameInfo) throws IOException {
-//        write(new WHGPMessage(WHGPMessageType.INITIALIZE_GAME, username));
-//        write(new WHGPMessage(WHGPMessageType.SET_GAME_INFO, gameInfo.printGameInfo()));
-        WHGPMessage msg = new WHGPMessage();
+       WHGPMessage msg = new WHGPMessage();
         msg.setWhgpMessageType(WHGPMessageType.INITIALIZE_GAME);
         msg.setMessage(username);
         write(msg);

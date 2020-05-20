@@ -11,12 +11,12 @@ public class WHGPServer extends Thread {
     private static int playerCounter = 0;
     private static int maxPlayer = 10;
 
-    public static String hostName = "";
+    private static String hostName = "";
 
     static ArrayList<String> playerList = new ArrayList<>();
     static ArrayList<Socket> playerSocketList = new ArrayList<>();
 
-    static Game game;
+    private static Game game;
 
     public WHGPServer(String ip, String port) {
         this.ip = ip;
@@ -37,5 +37,21 @@ public class WHGPServer extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static String getHostName() {
+        return hostName;
+    }
+
+    public static void setHostName(String hostName) {
+        WHGPServer.hostName = hostName;
+    }
+
+    public static Game getGame() {
+        return game;
+    }
+
+    public static void setGame(Game game) {
+        WHGPServer.game = game;
     }
 }

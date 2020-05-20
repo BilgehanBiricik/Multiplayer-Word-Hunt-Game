@@ -1,6 +1,8 @@
 import javafx.application.Platform;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -24,17 +26,14 @@ public class MessageHandler extends Thread {
                 message = (WHGPMessage) in.readObject();
 
                 if (message != null) {
-                    WHGPMessage finalMessage = message;
-                    switch (finalMessage.getWhgpMessageType()) {
+                    switch (message.getWhgpMessageType()) {
                         case PLAYER_JOINED:
-                            Platform.runLater(() -> {
-                                WordHuntGame.getInstance().getListView().getItems().setAll(finalMessage.getPlayerList());
-                            });
+                            Platform.runLater(() -> WordHuntGame.getInstance().getListView().getItems().setAll(message.getPlayerList()));
                             break;
                         case GET_GAME_INFO:
                             Platform.runLater(() ->
                             {
-                                WordHuntGame.getInstance().setGameInfo(finalMessage.getGameInfo());
+                                WordHuntGame.getInstance().setGameInfo(message.getGameInfo());
                                 WordHuntGame.getInstance().setWhgpClient(whgpClient);
                                 WordHuntGame.getInstance().getBtnStartGame().setVisible(message.isPlayerHost());
 
@@ -48,8 +47,8 @@ public class MessageHandler extends Thread {
                         case USERNAME_EXIST:
                             Platform.runLater(() -> {
                                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                                alert.setHeaderText(finalMessage.getMessageHeader());
-                                alert.setContentText(finalMessage.getMessage());
+                                alert.setHeaderText(message.getMessageHeader());
+                                alert.setContentText(message.getMessage());
                                 alert.show();
 
                             });
@@ -57,9 +56,22 @@ public class MessageHandler extends Thread {
                         case GAME_IS_STARTED:
                             Platform.runLater(() -> {
                                 Alert alert = new Alert(Alert.AlertType.WARNING);
-                                alert.setHeaderText(finalMessage.getMessageHeader());
-                                alert.setContentText(finalMessage.getMessage());
+                                alert.setHeaderText(message.getMessageHeader());
+                                alert.setContentText(message.getMessage());
                                 alert.show();
+                            });
+                            break;
+                        case GET_TILE_GRID:
+                            Platform.runLater(() -> {
+                                GridPane gridPane = new GridPane();
+                                for (int i = 0; i < message.getTileGird().get(0).size(); i++) {
+                                    for (int j = 0; j < message.getTileGird().size(); j++) {
+                                        gridPane.add(new TileButton(message.getTileGird().get(i).get(j)), j, i);
+                                    }
+                                }
+                                gridPane.setAlignment(Pos.CENTER);
+                                WordHuntGame.getInstance().getGameAreaPane().getChildren().clear();
+                                WordHuntGame.getInstance().getGameAreaPane().getChildren().setAll(gridPane);
                             });
                             break;
                     }

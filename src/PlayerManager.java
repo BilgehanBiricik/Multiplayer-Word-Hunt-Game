@@ -6,13 +6,11 @@ public class PlayerManager {
     private static PlayerManager playerManager;
 
     private List<PlayerHandler> players;
-    private List<Game> inProcessGames;
 
     public static ArrayList<String> playerList = new ArrayList<>();
 
     private PlayerManager() {
         players = new ArrayList<>();
-        inProcessGames = new ArrayList<>();
     }
 
     public static synchronized PlayerManager getInstance() {
@@ -39,7 +37,7 @@ public class PlayerManager {
         return players;
     }
 
-    public List<String> printAllPlayers() {
+    public List<String> printAllPlayersAndStats() {
         List<String> tmp = new ArrayList<>();
         for (PlayerHandler ph: players) {
             tmp.add(ph.getPlayerName() + " (Puan: " + ph.getPlayerPoint() + " - Skor: " + ph.getPlayerScore() + ")");
@@ -50,6 +48,5 @@ public class PlayerManager {
     public synchronized ArrayList<String> getPlayerList() {
         return playerList;
     }
-
 
 }
