@@ -71,9 +71,9 @@ public class PlayerHandler extends Thread {
                                     if (WHGPServer.getGame().getGameInfo().getX3TilesPositions().contains(position))
                                         tile.setTileType(TileType.X3);
 
-
-                                    tile.setPosition(position);
-                                    tile.setLetter(String.valueOf(position));
+                                    tile.setPosX(i);
+                                    tile.setPoxY(j);
+                                    tile.setLetter("");
                                     WHGPServer.getGame().getTileArrayLists().get(i).add(tile);
                                 }
                             }

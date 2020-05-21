@@ -4,7 +4,8 @@ import java.io.Serializable;
 
 public class Tile implements Serializable {
     private String letter;
-    private int position;
+    private int posX;
+    private int poxY;
     private TileType tileType;
 
     public Tile() {
@@ -19,12 +20,20 @@ public class Tile implements Serializable {
         this.letter = letter;
     }
 
-    public int getPosition() {
-        return position;
+    public int getPosX() {
+        return posX;
     }
 
-    public void setPosition(int position) {
-        this.position = position;
+    public void setPosX(int posX) {
+        this.posX = posX;
+    }
+
+    public int getPoxY() {
+        return poxY;
+    }
+
+    public void setPoxY(int poxY) {
+        this.poxY = poxY;
     }
 
     public TileType getTileType() {

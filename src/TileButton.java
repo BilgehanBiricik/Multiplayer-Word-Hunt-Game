@@ -2,8 +2,11 @@ import javafx.scene.control.Button;
 
 public class TileButton extends Button {
     private Tile tile;
+    private boolean isClicked;
 
     public TileButton(Tile tile) {
+
+        this.isClicked = false;
 
         super.setPrefWidth(40);
         super.setPrefHeight(40);
@@ -29,5 +32,13 @@ public class TileButton extends Button {
 
     public void setTile(Tile tile) {
         this.tile = tile;
+    }
+
+    public boolean isClicked() {
+        return isClicked;
+    }
+
+    public void setClicked(boolean clicked) {
+        isClicked = clicked;
     }
 }
