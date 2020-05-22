@@ -157,7 +157,7 @@ public class WordHuntGame {
                 wordIndex = 0;
                 foundFlag = false;
 
-                // TODO: ilk harften itibarende kontrol etmeye başla amk
+                // TODO: ilk harften itibarende kontrol etmeye başla
 
                 if ((lastSelectedTile.getPosY() - (word.length() - 1)) >= 0)
                     for (int i = (lastSelectedTile.getPosY() - (word.length() - 1)); i <= lastSelectedTile.getPosY(); i++) { // RIGHT TO LEFT SEARCH
