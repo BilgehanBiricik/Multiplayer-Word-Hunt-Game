@@ -1,4 +1,6 @@
-import javafx.collections.ObservableList;
+package client.stage;
+
+import client.WHGPClient;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -11,6 +13,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import server.GameInfo;
+import utils.tile.Tile;
+import utils.tile.TileButton;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -145,9 +150,7 @@ public class WordHuntGame {
 
         TextField txtFieldWord = new TextField();
         txtFieldWord.setPrefWidth(200);
-        txtFieldWord.setOnKeyReleased(keyEvent -> {
-            word = txtFieldWord.getText().trim();
-        });
+        txtFieldWord.setOnKeyReleased(keyEvent -> word = txtFieldWord.getText().trim());
 
         Button btnClean = new Button("Temizle");
 

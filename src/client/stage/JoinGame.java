@@ -1,3 +1,7 @@
+package client.stage;
+
+import client.ClientListener;
+import client.WHGPClient;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;

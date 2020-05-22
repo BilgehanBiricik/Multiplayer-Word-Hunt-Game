@@ -1,3 +1,7 @@
+package server;
+
+import utils.message.WHGPMessage;
+
 import java.io.IOException;
 import java.util.ArrayList;
 

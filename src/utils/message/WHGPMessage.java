@@ -1,3 +1,8 @@
+package utils.message;
+
+import server.GameInfo;
+import utils.tile.Tile;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 

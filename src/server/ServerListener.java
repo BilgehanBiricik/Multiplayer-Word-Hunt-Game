@@ -1,3 +1,10 @@
+package server;
+
+import utils.tile.Tile;
+import utils.tile.TileType;
+import utils.message.WHGPMessage;
+import utils.message.WHGPMessageType;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -76,13 +83,13 @@ public class ServerListener extends Thread {
                                 }
                             }
                             String pickedWord = WHGPServer.getGame().getDictionary().get((int) (Math.random() * (WHGPServer.getGame().getDictionary().size() + 1)));
-                            WHGPServer.getGame().getUsedWords().add(pickedWord);
+                            WHGPServer.getGame().getUsedWords().add(pickedWord.trim());
                             for (int i = 0; i < pickedWord.length(); i++) {
-                                WHGPServer.getGame().getTileArrayLists().get((int) Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2))
-                                        .get((int) ((Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2) - (int) Math.ceil(pickedWord.length() / 2)) + i))
+                                WHGPServer.getGame().getTileArrayLists().get((int) Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2.0))
+                                        .get((int) ((Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2.0) - (int) Math.ceil(pickedWord.length() / 2.0)) + i))
                                         .setLetter(String.valueOf(pickedWord.charAt(i)));
-                                WHGPServer.getGame().getTileArrayLists().get((int) Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2))
-                                        .get((int) ((Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2) - (int) Math.ceil(pickedWord.length() / 2)) + i)).
+                                WHGPServer.getGame().getTileArrayLists().get((int) Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2.0))
+                                        .get((int) ((Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2.0) - (int) Math.ceil(pickedWord.length() / 2.0)) + i)).
                                         setDisabled(true);
                             }
                             try {
@@ -177,8 +184,13 @@ public class ServerListener extends Thread {
                                 stringBuilder.append(tile.getLetter());
                             }
 
-                            if (WHGPServer.getGame().getDictionary().contains(stringBuilder.toString())
-                                    || !WHGPServer.getGame().getUsedWords().contains(stringBuilder.toString())) {
+                            String word = stringBuilder.toString().trim();
+
+                            if (!WHGPServer.getGame().getUsedWords().contains(word)
+                                    && WHGPServer.getGame().getDictionary().contains(word)) {
+
+                                ArrayList<String> uw = WHGPServer.getGame().getUsedWords();
+                                WHGPServer.getGame().getUsedWords().add(stringBuilder.toString().trim());
 
                                 for (int i = 0; i < message.getSelectedTiles().size(); i++) {
                                     WHGPServer.getGame().getTileArrayLists()
@@ -208,6 +220,7 @@ public class ServerListener extends Thread {
                             } else {
                                 msg = new WHGPMessage();
                                 msg.setWhgpMessageType(WHGPMessageType.WORD_REJECTED);
+                                msg.setMessageHeader("Hata");
                                 msg.setMessage("Girmiş olduğunuz kelime uygun değil veya daha önceden girilmiş. Lütfen farklı bir kelime giriniz.");
                                 write(msg);
                             }
@@ -216,9 +229,7 @@ public class ServerListener extends Thread {
                     }
 
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }

@@ -1,3 +1,10 @@
+package client;
+
+import server.GameInfo;
+import utils.tile.Tile;
+import utils.message.WHGPMessage;
+import utils.message.WHGPMessageType;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;

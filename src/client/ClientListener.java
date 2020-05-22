@@ -1,3 +1,6 @@
+package client;
+
+import client.stage.WordHuntGame;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -5,6 +8,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
+import utils.tile.Tile;
+import utils.tile.TileButton;
+import utils.message.WHGPMessage;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -62,6 +68,7 @@ public class ClientListener extends Thread {
 
                             });
                             break;
+                        case WORD_REJECTED:
                         case GAME_IS_STARTED:
                         case MAX_PLAYER_LIMIT:
                             Platform.runLater(() -> {
@@ -122,9 +129,7 @@ public class ClientListener extends Thread {
                     }
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
 

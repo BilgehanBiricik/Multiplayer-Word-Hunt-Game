@@ -1,3 +1,5 @@
+package utils.tile;
+
 import java.io.Serializable;
 
 public class Tile implements Serializable {
@@ -54,7 +56,7 @@ public class Tile implements Serializable {
 
     @Override
     public String toString() {
-        return "Tile{" +
+        return "utils.tile.Tile{" +
                 "tileType=" + tileType +
                 ", letter='" + letter + '\'' +
                 ", posX=" + posX +

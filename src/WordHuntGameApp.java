@@ -1,6 +1,7 @@
+import client.stage.JoinGame;
+import client.stage.SetUpGame;
 import javafx.application.Application;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;

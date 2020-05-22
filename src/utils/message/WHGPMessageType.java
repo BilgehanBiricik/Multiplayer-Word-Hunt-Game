@@ -1,3 +1,5 @@
+package utils.message;
+
 public enum WHGPMessageType {
     INITIALIZE_GAME,
     SET_GAME_INFO,
