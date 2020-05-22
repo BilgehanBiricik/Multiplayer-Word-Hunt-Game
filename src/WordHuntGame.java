@@ -22,6 +22,8 @@ public class WordHuntGame {
     private String word;
     private Tile lastSelectedTile;
     private ArrayList<Tile> wordToTileArrayList;
+    private int wordIndex;
+    private boolean foundFlag;
 
     private GameInfo gameInfo;
     private WHGPClient whgpClient;
@@ -152,8 +154,10 @@ public class WordHuntGame {
         Button btnSend = new Button("Gönder");
         btnSend.setOnAction(actionEvent -> {
             if (!word.equals("") && lastSelectedTile != null) {
-                int wordIndex = 0;
-                boolean foundFlag = false;
+                wordIndex = 0;
+                foundFlag = false;
+
+                // TODO: ilk harften itibarende kontrol etmeye başla amk
 
                 if ((lastSelectedTile.getPosY() - (word.length() - 1)) >= 0)
                     for (int i = (lastSelectedTile.getPosY() - (word.length() - 1)); i <= lastSelectedTile.getPosY(); i++) { // RIGHT TO LEFT SEARCH

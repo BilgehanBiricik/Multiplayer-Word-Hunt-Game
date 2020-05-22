@@ -1,5 +1,3 @@
-import javafx.stage.Stage;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -18,8 +16,8 @@ public class WHGPClient {
         out = new ObjectOutputStream(socket.getOutputStream());
         in = new ObjectInputStream(socket.getInputStream());
 
-        MessageHandler messageHandler = new MessageHandler(in, this);
-        messageHandler.start();
+        ClientListener clientListener = new ClientListener(in, this);
+        clientListener.start();
     }
 
     public void initializeGame(String username, GameInfo gameInfo) throws IOException {

@@ -2,23 +2,20 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class PlayerHandler extends Thread {
-    private int playerId;
-    private String playerName = "";
-    private int playerScore = 0;
-    private int playerPoint = 0;
-    private boolean isCurrentPlayer = false;
+public class ServerListener extends Thread {
+
+    private Player player;
 
     private ObjectInputStream in;
     private ObjectOutputStream out;
 
     private Socket socket;
 
-    public PlayerHandler(Socket socket, int playerId) throws IOException {
-        out = new ObjectOutputStream(socket.getOutputStream());
-        in = new ObjectInputStream(socket.getInputStream());
+    public ServerListener(Socket socket, int playerId) throws IOException {
+        this.out = new ObjectOutputStream(socket.getOutputStream());
+        this.in = new ObjectInputStream(socket.getInputStream());
         this.socket = socket;
-        this.playerId = playerId;
+        this.player = new Player(playerId, out);
     }
 
     @Override
@@ -34,21 +31,21 @@ public class PlayerHandler extends Thread {
                             if (PlayerManager.getInstance().getPlayers().size() == 0) {
                                 System.out.println(message.getMessage() + " initiate the game");
 
-                                setPlayerId(playerId);
-                                setPlayerName(message.getMessage());
-                                setPlayerScore(0);
-                                setPlayerPoint(0);
+                                player.setName(message.getMessage());
+                                player.setScore(0);
+                                player.setPoint(0);
 
-                                PlayerManager.getInstance().connectPlayer(this);
-                                PlayerManager.getInstance().getPlayerList().add(playerName);
+                                PlayerManager.getInstance().connectPlayer(player);
+                                PlayerManager.getInstance().getPlayerList().add(player.getName());
 
                                 WHGPServer.setGame(new Game());
-                                WHGPServer.setHostName(playerName);
+                                WHGPServer.setHostName(player.getName());
 
                                 try {
                                     WHGPMessage msg = new WHGPMessage();
                                     msg.setWhgpMessageType(WHGPMessageType.PLAYER_JOINED);
                                     msg.setPlayerList(PlayerManager.getInstance().printAllPlayersAndStats());
+                                    msg.setMessage(player.getName());
                                     PlayerManager.getInstance().sendToPlayers(msg);
 
                                 } catch (IOException e) {
@@ -79,7 +76,7 @@ public class PlayerHandler extends Thread {
                                 }
                             }
                             String pickedWord = WHGPServer.getGame().getDictionary().get((int) (Math.random() * (WHGPServer.getGame().getDictionary().size() + 1)));
-                            System.out.println(pickedWord);
+                            WHGPServer.getGame().getUsedWords().add(pickedWord);
                             for (int i = 0; i < pickedWord.length(); i++) {
                                 WHGPServer.getGame().getTileArrayLists().get((int) Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2))
                                         .get((int) ((Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2) - (int) Math.ceil(pickedWord.length() / 2)) + i))
@@ -92,7 +89,7 @@ public class PlayerHandler extends Thread {
                                 WHGPMessage msg = new WHGPMessage();
                                 msg.setWhgpMessageType(WHGPMessageType.GET_GAME_INFO);
                                 msg.setGameInfo(WHGPServer.getGame().getGameInfo());
-                                msg.setPlayerHost(getPlayerName().equals(WHGPServer.getHostName()));
+                                msg.setPlayerHost(player.getName().equals(WHGPServer.getHostName()));
                                 write(msg);
 
                                 msg = new WHGPMessage();
@@ -107,18 +104,19 @@ public class PlayerHandler extends Thread {
                             if (!WHGPServer.getGame().isGameStarted()) {
                                 if (PlayerManager.getInstance().getPlayerList().size() < WHGPServer.getMaxPlayer()) {
                                     if (!PlayerManager.getInstance().getPlayerList().contains(message.getMessage())) {
-                                        setPlayerId(playerId);
-                                        setPlayerName(message.getMessage());
-                                        setPlayerScore(0);
-                                        setPlayerPoint(0);
 
-                                        PlayerManager.getInstance().connectPlayer(this);
-                                        PlayerManager.getInstance().getPlayerList().add(playerName);
+                                        player.setName(message.getMessage());
+                                        player.setScore(0);
+                                        player.setPoint(0);
+
+                                        PlayerManager.getInstance().connectPlayer(player);
+                                        PlayerManager.getInstance().getPlayerList().add(player.getName());
 
                                         try {
                                             WHGPMessage msg = new WHGPMessage();
                                             msg.setWhgpMessageType(WHGPMessageType.PLAYER_JOINED);
                                             msg.setPlayerList(PlayerManager.getInstance().printAllPlayersAndStats());
+                                            msg.setMessage(player.getName());
                                             PlayerManager.getInstance().sendToPlayers(msg);
 
                                             msg = new WHGPMessage();
@@ -168,13 +166,8 @@ public class PlayerHandler extends Thread {
                             WHGPServer.getGame().setCurrentPlayer(PlayerManager.getInstance().getPlayers().get(0));
 
                             WHGPMessage msg = new WHGPMessage();
-                            msg.setWhgpMessageType(WHGPMessageType.ACTIVATE_PANES);
-                            msg.setGamePanesActive(true);
-                            write(msg);
-
-                            msg = new WHGPMessage();
                             msg.setWhgpMessageType(WHGPMessageType.CURRENT_PLAYER);
-                            msg.setMessage(WHGPServer.getGame().getCurrentPlayer().getPlayerName());
+                            msg.setMessage(WHGPServer.getGame().getCurrentPlayer().getName());
                             PlayerManager.getInstance().sendToPlayers(msg);
                             break;
 
@@ -187,7 +180,7 @@ public class PlayerHandler extends Thread {
                             if (WHGPServer.getGame().getDictionary().contains(stringBuilder.toString())
                                     || !WHGPServer.getGame().getUsedWords().contains(stringBuilder.toString())) {
 
-                                for(int i = 0; i < message.getSelectedTiles().size(); i++) {
+                                for (int i = 0; i < message.getSelectedTiles().size(); i++) {
                                     WHGPServer.getGame().getTileArrayLists()
                                             .get(message.getSelectedTiles().get(i).getPosX())
                                             .get(message.getSelectedTiles().get(i).getPosY()).setLetter(message.getSelectedTiles()
@@ -196,6 +189,16 @@ public class PlayerHandler extends Thread {
                                             .get(message.getSelectedTiles().get(i).getPosX())
                                             .get(message.getSelectedTiles().get(i).getPosY()).setDisabled(true);
                                 }
+
+                                int currentPlayerId = WHGPServer.getGame().getCurrentPlayer().getId();
+                                ++currentPlayerId;
+                                currentPlayerId %= PlayerManager.getInstance().getPlayers().size();
+                                WHGPServer.getGame().setCurrentPlayer(PlayerManager.getInstance().getPlayers().get(currentPlayerId));
+
+                                msg = new WHGPMessage();
+                                msg.setWhgpMessageType(WHGPMessageType.CURRENT_PLAYER);
+                                msg.setMessage(WHGPServer.getGame().getCurrentPlayer().getName());
+                                PlayerManager.getInstance().sendToPlayers(msg);
 
                                 msg = new WHGPMessage();
                                 msg.setWhgpMessageType(WHGPMessageType.GET_TILE_GRID);
@@ -222,47 +225,17 @@ public class PlayerHandler extends Thread {
 
     }
 
-    synchronized void write(WHGPMessage message) throws IOException {
-        System.out.println("Send to " + playerName + " - " + out.toString());
+    private synchronized void write(WHGPMessage message) throws IOException {
         out.writeUnshared(message);
         out.reset();
     }
 
-    public void updatePoint(int p) {
-        this.playerPoint += p;
+    public Player getPlayer() {
+        return player;
     }
 
-
-    public int getPlayerId() {
-        return playerId;
-    }
-
-    public void setPlayerId(int playerId) {
-        this.playerId = playerId;
-    }
-
-    public String getPlayerName() {
-        return playerName;
-    }
-
-    public void setPlayerName(String playerName) {
-        this.playerName = playerName;
-    }
-
-    public int getPlayerScore() {
-        return playerScore;
-    }
-
-    public void setPlayerScore(int playerScore) {
-        this.playerScore = playerScore;
-    }
-
-    public int getPlayerPoint() {
-        return playerPoint;
-    }
-
-    public void setPlayerPoint(int playerPoint) {
-        this.playerPoint = playerPoint;
+    public void setPlayer(Player player) {
+        this.player = player;
     }
 
 }

@@ -9,14 +9,17 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
-public class MessageHandler extends Thread {
+public class ClientListener extends Thread {
     private ObjectInputStream in;
     private WHGPClient whgpClient;
     private static Stage parentStage;
 
-    public MessageHandler(ObjectInputStream in, WHGPClient whgpClient) {
+    private String clientName;
+
+    public ClientListener(ObjectInputStream in, WHGPClient whgpClient) {
         this.in = in;
         this.whgpClient = whgpClient;
+        clientName = "";
     }
 
     @Override
@@ -29,7 +32,11 @@ public class MessageHandler extends Thread {
                 if (message != null) {
                     switch (message.getWhgpMessageType()) {
                         case PLAYER_JOINED:
-                            Platform.runLater(() -> WordHuntGame.getInstance().getListView().getItems().setAll(message.getPlayerList()));
+                            Platform.runLater(() ->
+                            {
+                                WordHuntGame.getInstance().getListView().getItems().setAll(message.getPlayerList());
+                                if (clientName.equals("")) this.clientName = message.getMessage();
+                            });
                             break;
                         case GET_GAME_INFO:
                             Platform.runLater(() ->
@@ -72,20 +79,28 @@ public class MessageHandler extends Thread {
                                     Tile tile = message.getTileGird().get(i).get(j);
                                     TileButton tileButton = new TileButton(tile);
                                     tileButton.setOnAction(actionEvent -> {
-                                        int index = tileButton.getClickCounter();
-                                        if (index >= 0 && index <= WordHuntGame.getInstance().getWord().length()) {
-                                            if (index == WordHuntGame.getInstance().getWord().length()) {
-                                                tile.setLetter("");
-                                                tileButton.setText("");
-                                                tileButton.setClickCounter(0);
-                                                WordHuntGame.getInstance().setLastSelectedTile(null);
-                                            } else {
-                                                String letter = String.valueOf(WordHuntGame.getInstance().getWord().charAt(index));
-                                                tile.setLetter(letter);
-                                                tileButton.setText(letter.toUpperCase());
-                                                tileButton.setClickCounter(++index);
-                                                WordHuntGame.getInstance().setLastSelectedTile(tile);
+                                        if (WordHuntGame.getInstance().getWord().length() > 1) {
+                                            int index = tileButton.getClickCounter();
+                                            if (index >= 0 && index <= WordHuntGame.getInstance().getWord().length()) {
+                                                if (index == WordHuntGame.getInstance().getWord().length()) {
+                                                    tile.setLetter("");
+                                                    tileButton.setText("");
+                                                    tileButton.setClickCounter(0);
+                                                    WordHuntGame.getInstance().setLastSelectedTile(null);
+                                                } else {
+                                                    String letter = String.valueOf(WordHuntGame.getInstance().getWord().charAt(index));
+                                                    tile.setLetter(letter);
+                                                    tileButton.setText(letter.toUpperCase());
+                                                    tileButton.setClickCounter(++index);
+                                                    WordHuntGame.getInstance().setLastSelectedTile(tile);
+                                                }
                                             }
+                                        } else {
+                                            Alert alert = new Alert(Alert.AlertType.WARNING);
+                                            alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+                                            alert.setHeaderText("Uyarı");
+                                            alert.setContentText("Girdiğiniz kelime 2 harften uzun olmalı!");
+                                            alert.show();
                                         }
                                     });
                                     gridPane.add(tileButton, j, i);
@@ -97,15 +112,11 @@ public class MessageHandler extends Thread {
                                 WordHuntGame.getInstance().getGameAreaPane().getChildren().setAll(gridPane);
                             });
                             break;
-                        case ACTIVATE_PANES:
-                            Platform.runLater(() -> {
-                                WordHuntGame.getInstance().getGameWordInsertionPane().setDisable(!message.isGamePanesActive());
-                                WordHuntGame.getInstance().getGameAreaPane().setDisable(!message.isGamePanesActive());
-                            });
-                            break;
                         case CURRENT_PLAYER:
                             Platform.runLater(() -> {
                                 WordHuntGame.getInstance().getTxtCurrentPlayer().setText("Sıra " + message.getMessage() + " adlı kullanıcıda");
+                                WordHuntGame.getInstance().getGameWordInsertionPane().setDisable(!message.getMessage().equals(this.clientName));
+                                WordHuntGame.getInstance().getGameAreaPane().setDisable(!message.getMessage().equals(this.clientName));
                             });
                             break;
                     }
@@ -124,6 +135,6 @@ public class MessageHandler extends Thread {
     }
 
     public static void setParentStage(Stage parentStage) {
-        MessageHandler.parentStage = parentStage;
+        ClientListener.parentStage = parentStage;
     }
 }

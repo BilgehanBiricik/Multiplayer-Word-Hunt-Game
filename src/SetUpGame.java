@@ -61,7 +61,7 @@ public class SetUpGame extends BorderPane {
 
             if (checkRules()) {
                 try {
-                    MessageHandler.setParentStage(parentStage);
+                    ClientListener.setParentStage(parentStage);
                     whgpServer = new WHGPServer(txtFieldIp.getText(), txtFieldPort.getText());
                     whgpServer.start();
                     whgpClient = new WHGPClient(txtFieldIp.getText(), txtFieldPort.getText());

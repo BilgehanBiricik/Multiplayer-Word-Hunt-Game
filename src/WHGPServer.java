@@ -13,9 +13,6 @@ public class WHGPServer extends Thread {
 
     private static String hostName = "";
 
-    static ArrayList<String> playerList = new ArrayList<>();
-    static ArrayList<Socket> playerSocketList = new ArrayList<>();
-
     private static Game game;
 
     public WHGPServer(String ip, String port) {
@@ -29,10 +26,8 @@ public class WHGPServer extends Thread {
             System.out.println("The server is running...");
             while (true) {
                 Socket socket = serverSocket.accept();
+                new ServerListener(socket, playerCounter).start();
                 playerCounter++;
-                playerList.add("Player" + playerCounter);
-                playerSocketList.add(socket);
-                new PlayerHandler(socket, playerCounter).start();
             }
         } catch (IOException e) {
             e.printStackTrace();

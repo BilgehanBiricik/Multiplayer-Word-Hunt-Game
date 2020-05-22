@@ -9,7 +9,7 @@ public class Game {
     private GameInfo gameInfo;
     private boolean isGameStarted;
 
-    private PlayerHandler currentPlayer;
+    private Player currentPlayer;
 
     private ArrayList<ArrayList<Tile>> tileArrayLists;
     private ArrayList<String> dictionary;
@@ -72,11 +72,11 @@ public class Game {
         this.usedWords = usedWords;
     }
 
-    public PlayerHandler getCurrentPlayer() {
+    public Player getCurrentPlayer() {
         return currentPlayer;
     }
 
-    public void setCurrentPlayer(PlayerHandler currentPlayer) {
+    public void setCurrentPlayer(Player currentPlayer) {
         this.currentPlayer = currentPlayer;
     }
 }

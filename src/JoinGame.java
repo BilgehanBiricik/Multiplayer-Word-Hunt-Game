@@ -22,7 +22,7 @@ public class JoinGame extends BorderPane {
         btnJoinGame.setPrefWidth(100);
         btnJoinGame.setOnAction(actionEvent -> {
             try {
-                MessageHandler.setParentStage(parentStage);
+                ClientListener.setParentStage(parentStage);
                 whgpClient = new WHGPClient(txtFieldIp.getText(), txtFieldPort.getText());
                 whgpClient.joinGame(txtFieldUsername.getText());
             } catch (IOException e) {
