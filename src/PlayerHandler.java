@@ -7,7 +7,7 @@ public class PlayerHandler extends Thread {
     private String playerName = "";
     private int playerScore = 0;
     private int playerPoint = 0;
-    private boolean isPlayerTurn = false;
+    private boolean isCurrentPlayer = false;
 
     private ObjectInputStream in;
     private ObjectOutputStream out;
@@ -27,7 +27,7 @@ public class PlayerHandler extends Thread {
         while (socket.isConnected()) {
             try {
                 WHGPMessage message;
-                message = (WHGPMessage) in.readObject();
+                message = (WHGPMessage) in.readUnshared();
                 if (message != null) {
                     switch (message.getWhgpMessageType()) {
                         case INITIALIZE_GAME:
@@ -40,7 +40,7 @@ public class PlayerHandler extends Thread {
                                 setPlayerPoint(0);
 
                                 PlayerManager.getInstance().connectPlayer(this);
-                                PlayerManager.playerList.add(playerName);
+                                PlayerManager.getInstance().getPlayerList().add(playerName);
 
                                 WHGPServer.setGame(new Game());
                                 WHGPServer.setHostName(playerName);
@@ -50,6 +50,7 @@ public class PlayerHandler extends Thread {
                                     msg.setWhgpMessageType(WHGPMessageType.PLAYER_JOINED);
                                     msg.setPlayerList(PlayerManager.getInstance().printAllPlayersAndStats());
                                     PlayerManager.getInstance().sendToPlayers(msg);
+
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
@@ -72,10 +73,20 @@ public class PlayerHandler extends Thread {
                                         tile.setTileType(TileType.X3);
 
                                     tile.setPosX(i);
-                                    tile.setPoxY(j);
+                                    tile.setPosY(j);
                                     tile.setLetter("");
                                     WHGPServer.getGame().getTileArrayLists().get(i).add(tile);
                                 }
+                            }
+                            String pickedWord = WHGPServer.getGame().getDictionary().get((int) (Math.random() * (WHGPServer.getGame().getDictionary().size() + 1)));
+                            System.out.println(pickedWord);
+                            for (int i = 0; i < pickedWord.length(); i++) {
+                                WHGPServer.getGame().getTileArrayLists().get((int) Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2))
+                                        .get((int) ((Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2) - (int) Math.ceil(pickedWord.length() / 2)) + i))
+                                        .setLetter(String.valueOf(pickedWord.charAt(i)));
+                                WHGPServer.getGame().getTileArrayLists().get((int) Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2))
+                                        .get((int) ((Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2) - (int) Math.ceil(pickedWord.length() / 2)) + i)).
+                                        setDisabled(true);
                             }
                             try {
                                 WHGPMessage msg = new WHGPMessage();
@@ -94,45 +105,55 @@ public class PlayerHandler extends Thread {
                             break;
                         case JOIN_REQUEST:
                             if (!WHGPServer.getGame().isGameStarted()) {
-                                if (!PlayerManager.playerList.contains(message.getMessage())) {
-                                    setPlayerId(playerId);
-                                    setPlayerName(message.getMessage());
-                                    setPlayerScore(0);
-                                    setPlayerPoint(0);
+                                if (PlayerManager.getInstance().getPlayerList().size() < WHGPServer.getMaxPlayer()) {
+                                    if (!PlayerManager.getInstance().getPlayerList().contains(message.getMessage())) {
+                                        setPlayerId(playerId);
+                                        setPlayerName(message.getMessage());
+                                        setPlayerScore(0);
+                                        setPlayerPoint(0);
 
-                                    PlayerManager.getInstance().connectPlayer(this);
-                                    PlayerManager.playerList.add(playerName);
+                                        PlayerManager.getInstance().connectPlayer(this);
+                                        PlayerManager.getInstance().getPlayerList().add(playerName);
 
-                                    try {
-                                        WHGPMessage msg = new WHGPMessage();
-                                        msg.setWhgpMessageType(WHGPMessageType.PLAYER_JOINED);
-                                        msg.setPlayerList(PlayerManager.getInstance().printAllPlayersAndStats());
-                                        PlayerManager.getInstance().sendToPlayers(msg);
+                                        try {
+                                            WHGPMessage msg = new WHGPMessage();
+                                            msg.setWhgpMessageType(WHGPMessageType.PLAYER_JOINED);
+                                            msg.setPlayerList(PlayerManager.getInstance().printAllPlayersAndStats());
+                                            PlayerManager.getInstance().sendToPlayers(msg);
 
-                                        msg = new WHGPMessage();
-                                        msg.setWhgpMessageType(WHGPMessageType.GET_GAME_INFO);
-                                        msg.setGameInfo(WHGPServer.getGame().getGameInfo());
-                                        write(msg);
+                                            msg = new WHGPMessage();
+                                            msg.setWhgpMessageType(WHGPMessageType.GET_GAME_INFO);
+                                            msg.setGameInfo(WHGPServer.getGame().getGameInfo());
+                                            write(msg);
 
-                                        msg = new WHGPMessage();
-                                        msg.setWhgpMessageType(WHGPMessageType.GET_TILE_GRID);
-                                        msg.setTileGird(WHGPServer.getGame().getTileArrayLists());
-                                        write(msg);
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
+                                            msg = new WHGPMessage();
+                                            msg.setWhgpMessageType(WHGPMessageType.GET_TILE_GRID);
+                                            msg.setTileGird(WHGPServer.getGame().getTileArrayLists());
+                                            write(msg);
+
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+
+                                    } else {
+                                        try {
+                                            WHGPMessage msg = new WHGPMessage();
+                                            msg.setWhgpMessageType(WHGPMessageType.USERNAME_EXIST);
+                                            msg.setMessageHeader("Kullanıcı Adı Mevcut");
+                                            msg.setMessage("Böyle bir kullanıcı adı mevcut. Lütfen farklı bir isim giriniz.");
+                                            write(msg);
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
                                     }
-
                                 } else {
-                                    try {
-                                        WHGPMessage msg = new WHGPMessage();
-                                        msg.setWhgpMessageType(WHGPMessageType.USERNAME_EXIST);
-                                        msg.setMessageHeader("Kullanıcı Adı Mevcut");
-                                        msg.setMessage("Böyle bir kullanıcı adı mevcut. Lütfen farklı bir isim giriniz.");
-                                        write(msg);
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
+                                    WHGPMessage msg = new WHGPMessage();
+                                    msg.setWhgpMessageType(WHGPMessageType.MAX_PLAYER_LIMIT);
+                                    msg.setMessageHeader("Oyuncu Sınırı");
+                                    msg.setMessage("Oyuncu sayısı maksimum kapasiteye ulaştığı için katılamazsınız.");
+                                    write(msg);
                                 }
+
                             } else {
                                 WHGPMessage msg = new WHGPMessage();
                                 msg.setWhgpMessageType(WHGPMessageType.GAME_IS_STARTED);
@@ -143,6 +164,51 @@ public class PlayerHandler extends Thread {
                             break;
                         case START_GAME:
                             WHGPServer.getGame().setGameStarted(true);
+
+                            WHGPServer.getGame().setCurrentPlayer(PlayerManager.getInstance().getPlayers().get(0));
+
+                            WHGPMessage msg = new WHGPMessage();
+                            msg.setWhgpMessageType(WHGPMessageType.ACTIVATE_PANES);
+                            msg.setGamePanesActive(true);
+                            write(msg);
+
+                            msg = new WHGPMessage();
+                            msg.setWhgpMessageType(WHGPMessageType.CURRENT_PLAYER);
+                            msg.setMessage(WHGPServer.getGame().getCurrentPlayer().getPlayerName());
+                            PlayerManager.getInstance().sendToPlayers(msg);
+                            break;
+
+                        case SEND_WORD:
+                            StringBuilder stringBuilder = new StringBuilder();
+                            for (Tile tile : message.getSelectedTiles()) {
+                                stringBuilder.append(tile.getLetter());
+                            }
+
+                            if (WHGPServer.getGame().getDictionary().contains(stringBuilder.toString())
+                                    || !WHGPServer.getGame().getUsedWords().contains(stringBuilder.toString())) {
+
+                                for(int i = 0; i < message.getSelectedTiles().size(); i++) {
+                                    WHGPServer.getGame().getTileArrayLists()
+                                            .get(message.getSelectedTiles().get(i).getPosX())
+                                            .get(message.getSelectedTiles().get(i).getPosY()).setLetter(message.getSelectedTiles()
+                                            .get(i).getLetter());
+                                    WHGPServer.getGame().getTileArrayLists()
+                                            .get(message.getSelectedTiles().get(i).getPosX())
+                                            .get(message.getSelectedTiles().get(i).getPosY()).setDisabled(true);
+                                }
+
+                                msg = new WHGPMessage();
+                                msg.setWhgpMessageType(WHGPMessageType.GET_TILE_GRID);
+                                msg.setTileGird(WHGPServer.getGame().getTileArrayLists());
+                                PlayerManager.getInstance().sendToPlayers(msg);
+
+                            } else {
+                                msg = new WHGPMessage();
+                                msg.setWhgpMessageType(WHGPMessageType.WORD_REJECTED);
+                                msg.setMessage("Girmiş olduğunuz kelime uygun değil veya daha önceden girilmiş. Lütfen farklı bir kelime giriniz.");
+                                write(msg);
+                            }
+
                             break;
                     }
 
@@ -158,8 +224,8 @@ public class PlayerHandler extends Thread {
 
     synchronized void write(WHGPMessage message) throws IOException {
         System.out.println("Send to " + playerName + " - " + out.toString());
-        out.writeObject(message);
-        out.flush();
+        out.writeUnshared(message);
+        out.reset();
     }
 
     public void updatePoint(int p) {
@@ -199,11 +265,4 @@ public class PlayerHandler extends Thread {
         this.playerPoint = playerPoint;
     }
 
-    public boolean isPlayerTurn() {
-        return isPlayerTurn;
-    }
-
-    public void setPlayerTurn(boolean playerTurn) {
-        isPlayerTurn = playerTurn;
-    }
 }

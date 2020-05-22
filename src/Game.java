@@ -1,20 +1,35 @@
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Scanner;
 
 public class Game {
 
     private GameInfo gameInfo;
     private boolean isGameStarted;
 
-    private PlayerHandler turn;
-
-    private String currentClient;
+    private PlayerHandler currentPlayer;
 
     private ArrayList<ArrayList<Tile>> tileArrayLists;
+    private ArrayList<String> dictionary;
+    private ArrayList<String> usedWords;
 
 
-    public Game() {
+    public Game() throws FileNotFoundException {
         isGameStarted = false;
         tileArrayLists = new ArrayList<>();
+        usedWords = new ArrayList<>();
+        fillDictionary();
+    }
+
+    private void fillDictionary() throws FileNotFoundException {
+        dictionary = new ArrayList<>();
+        File file = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("dictionary.txt")).getFile());
+        Scanner resourceReader = new Scanner(file);
+
+        while (resourceReader.hasNext())
+            dictionary.add(resourceReader.nextLine());
     }
 
     public GameInfo getGameInfo() {
@@ -39,5 +54,29 @@ public class Game {
 
     public void setTileArrayLists(ArrayList<ArrayList<Tile>> tileArrayLists) {
         this.tileArrayLists = tileArrayLists;
+    }
+
+    public ArrayList<String> getDictionary() {
+        return dictionary;
+    }
+
+    public void setDictionary(ArrayList<String> dictionary) {
+        this.dictionary = dictionary;
+    }
+
+    public ArrayList<String> getUsedWords() {
+        return usedWords;
+    }
+
+    public void setUsedWords(ArrayList<String> usedWords) {
+        this.usedWords = usedWords;
+    }
+
+    public PlayerHandler getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    public void setCurrentPlayer(PlayerHandler currentPlayer) {
+        this.currentPlayer = currentPlayer;
     }
 }

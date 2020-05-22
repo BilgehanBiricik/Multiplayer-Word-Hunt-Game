@@ -54,4 +54,12 @@ public class WHGPServer extends Thread {
     public static void setGame(Game game) {
         WHGPServer.game = game;
     }
+
+    public static int getMaxPlayer() {
+        return maxPlayer;
+    }
+
+    public static void setMaxPlayer(int maxPlayer) {
+        WHGPServer.maxPlayer = maxPlayer;
+    }
 }

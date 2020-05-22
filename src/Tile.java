@@ -1,15 +1,15 @@
-import javafx.scene.control.Button;
-
 import java.io.Serializable;
 
 public class Tile implements Serializable {
+    private TileType tileType;
     private String letter;
     private int posX;
-    private int poxY;
-    private TileType tileType;
+    private int posY;
+    private boolean isDisabled;
 
     public Tile() {
         this.tileType = TileType.NORMAL;
+        this.isDisabled = false;
     }
 
     public String getLetter() {
@@ -28,12 +28,12 @@ public class Tile implements Serializable {
         this.posX = posX;
     }
 
-    public int getPoxY() {
-        return poxY;
+    public int getPosY() {
+        return posY;
     }
 
-    public void setPoxY(int poxY) {
-        this.poxY = poxY;
+    public void setPosY(int poxY) {
+        this.posY = poxY;
     }
 
     public TileType getTileType() {
@@ -42,5 +42,24 @@ public class Tile implements Serializable {
 
     public void setTileType(TileType tileType) {
         this.tileType = tileType;
+    }
+
+    public boolean isDisabled() {
+        return isDisabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        isDisabled = disabled;
+    }
+
+    @Override
+    public String toString() {
+        return "Tile{" +
+                "tileType=" + tileType +
+                ", letter='" + letter + '\'' +
+                ", posX=" + posX +
+                ", posY=" + posY +
+                ", isDisable=" + isDisabled +
+                '}';
     }
 }

@@ -1,8 +1,10 @@
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
@@ -68,6 +70,12 @@ public class SetUpGame extends BorderPane {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            } else {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+                alert.setHeaderText("Dikkat");
+                alert.setContentText("Kurallara uygun değerler girin.");
+                alert.show();
             }
 
         });
@@ -159,7 +167,8 @@ public class SetUpGame extends BorderPane {
             while (arrayList.contains(randPosition)
                     || unavailableTilesPositions.contains(randPosition)
                     || x2TilesPositions.contains(randPosition)
-                    || x3TilesPositions.contains(randPosition))
+                    || x3TilesPositions.contains(randPosition)
+                    || (randPosition >= (gameAreaX * Math.ceil(gameAreaX / 2)) && randPosition <= (gameAreaX * Math.ceil(gameAreaX / 2) + gameAreaX)))
                 randPosition = (int) (Math.random() * (max + 1));
             arrayList.add(randPosition);
         }

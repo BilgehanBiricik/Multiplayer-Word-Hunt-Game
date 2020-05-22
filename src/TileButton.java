@@ -2,15 +2,18 @@ import javafx.scene.control.Button;
 
 public class TileButton extends Button {
     private Tile tile;
-    private boolean isClicked;
+    private int clickCounter;
 
     public TileButton(Tile tile) {
 
-        this.isClicked = false;
+        this.clickCounter = 0;
+        this.tile = tile;
+
 
         super.setPrefWidth(40);
         super.setPrefHeight(40);
-        super.setText(tile.getLetter());
+        super.setText(tile.getLetter().toUpperCase());
+        super.setDisable(tile.isDisabled());
 
         switch (tile.getTileType()) {
             case UNAVAILABLE:
@@ -34,11 +37,11 @@ public class TileButton extends Button {
         this.tile = tile;
     }
 
-    public boolean isClicked() {
-        return isClicked;
+    public int getClickCounter() {
+        return clickCounter;
     }
 
-    public void setClicked(boolean clicked) {
-        isClicked = clicked;
+    public void setClickCounter(int clickCounter) {
+        this.clickCounter = clickCounter;
     }
 }

@@ -1,16 +1,19 @@
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 public class WHGPMessage implements Serializable {
     private WHGPMessageType whgpMessageType;
     private String messageHeader;
     private String message;
-    private List<String> playerList;
     private GameInfo gameInfo;
+
     private boolean isGameStarted;
     private boolean isPlayerHost;
+    private boolean gamePanesActive;
+
     private ArrayList<ArrayList<Tile>> tileGird;
+    private ArrayList<Tile> selectedTiles;
+    private ArrayList<String> playerList;
 
     public WHGPMessage() {
     }
@@ -39,11 +42,11 @@ public class WHGPMessage implements Serializable {
         this.messageHeader = messageHeader;
     }
 
-    public List<String> getPlayerList() {
+    public ArrayList<String> getPlayerList() {
         return playerList;
     }
 
-    public void setPlayerList(List<String> playerList) {
+    public void setPlayerList(ArrayList<String> playerList) {
         this.playerList = playerList;
     }
 
@@ -77,5 +80,21 @@ public class WHGPMessage implements Serializable {
 
     public void setTileGird(ArrayList<ArrayList<Tile>> tileGird) {
         this.tileGird = tileGird;
+    }
+
+    public ArrayList<Tile> getSelectedTiles() {
+        return selectedTiles;
+    }
+
+    public void setSelectedTiles(ArrayList<Tile> selectedTiles) {
+        this.selectedTiles = selectedTiles;
+    }
+
+    public boolean isGamePanesActive() {
+        return gamePanesActive;
+    }
+
+    public void setGamePanesActive(boolean gamePanesActive) {
+        this.gamePanesActive = gamePanesActive;
     }
 }

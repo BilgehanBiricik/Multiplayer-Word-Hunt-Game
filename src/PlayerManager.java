@@ -5,12 +5,13 @@ import java.util.List;
 public class PlayerManager {
     private static PlayerManager playerManager;
 
-    private List<PlayerHandler> players;
+    private ArrayList<PlayerHandler> players;
 
-    public static ArrayList<String> playerList = new ArrayList<>();
+    private ArrayList<String> playerList;
 
     private PlayerManager() {
         players = new ArrayList<>();
+        playerList = new ArrayList<>();
     }
 
     public static synchronized PlayerManager getInstance() {
@@ -33,12 +34,16 @@ public class PlayerManager {
         players.remove(ph);
     }
 
-    public synchronized List<PlayerHandler> getPlayers() {
+    public synchronized ArrayList<PlayerHandler> getPlayers() {
         return players;
     }
 
-    public List<String> printAllPlayersAndStats() {
-        List<String> tmp = new ArrayList<>();
+    public void setPlayers(ArrayList<PlayerHandler> players) {
+        this.players = players;
+    }
+
+    public ArrayList<String> printAllPlayersAndStats() {
+        ArrayList<String> tmp = new ArrayList<>();
         for (PlayerHandler ph: players) {
             tmp.add(ph.getPlayerName() + " (Puan: " + ph.getPlayerPoint() + " - Skor: " + ph.getPlayerScore() + ")");
         }
@@ -49,4 +54,7 @@ public class PlayerManager {
         return playerList;
     }
 
+    public void setPlayerList(ArrayList<String> playerList) {
+        this.playerList = playerList;
+    }
 }

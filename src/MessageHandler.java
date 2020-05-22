@@ -24,7 +24,7 @@ public class MessageHandler extends Thread {
         try {
             while (whgpClient.socket.isConnected()) {
                 WHGPMessage message;
-                message = (WHGPMessage) in.readObject();
+                message = (WHGPMessage) in.readUnshared();
 
                 if (message != null) {
                     switch (message.getWhgpMessageType()) {
@@ -56,6 +56,7 @@ public class MessageHandler extends Thread {
                             });
                             break;
                         case GAME_IS_STARTED:
+                        case MAX_PLAYER_LIMIT:
                             Platform.runLater(() -> {
                                 Alert alert = new Alert(Alert.AlertType.WARNING);
                                 alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
@@ -65,31 +66,46 @@ public class MessageHandler extends Thread {
                             });
                             break;
                         case GET_TILE_GRID:
-                            Platform.runLater(() -> {
-                                GridPane gridPane = new GridPane();
-                                for (int i = 0; i < message.getTileGird().get(0).size(); i++) {
-                                    for (int j = 0; j < message.getTileGird().size(); j++) {
-                                        TileButton tileButton = new TileButton(message.getTileGird().get(i).get(j));
-                                        tileButton.setOnAction(actionEvent -> {
-                                            int index = WordHuntGame.getInstance().getWordCharIndex();
-                                            Tile tile = new Tile();
-                                            if (!tileButton.isClicked() && WordHuntGame.getInstance().getWord().length() > index) {
-                                                tileButton.setText(String.valueOf(WordHuntGame.getInstance().getWord().charAt(index)).toUpperCase());
-                                                tileButton.setClicked(true);
-                                                WordHuntGame.getInstance().setWordCharIndex(++index);
-                                            } else if (tileButton.isClicked() && 0 < index) {
+                            GridPane gridPane = new GridPane();
+                            for (int i = 0; i < message.getTileGird().get(0).size(); i++) {
+                                for (int j = 0; j < message.getTileGird().size(); j++) {
+                                    Tile tile = message.getTileGird().get(i).get(j);
+                                    TileButton tileButton = new TileButton(tile);
+                                    tileButton.setOnAction(actionEvent -> {
+                                        int index = tileButton.getClickCounter();
+                                        if (index >= 0 && index <= WordHuntGame.getInstance().getWord().length()) {
+                                            if (index == WordHuntGame.getInstance().getWord().length()) {
+                                                tile.setLetter("");
                                                 tileButton.setText("");
-                                                tileButton.setClicked(false);
-                                                WordHuntGame.getInstance().setWordCharIndex(--index);
+                                                tileButton.setClickCounter(0);
+                                                WordHuntGame.getInstance().setLastSelectedTile(null);
+                                            } else {
+                                                String letter = String.valueOf(WordHuntGame.getInstance().getWord().charAt(index));
+                                                tile.setLetter(letter);
+                                                tileButton.setText(letter.toUpperCase());
+                                                tileButton.setClickCounter(++index);
+                                                WordHuntGame.getInstance().setLastSelectedTile(tile);
                                             }
-
-                                        });
-                                        gridPane.add(tileButton, j, i);
-                                    }
+                                        }
+                                    });
+                                    gridPane.add(tileButton, j, i);
                                 }
+                            }
+                            Platform.runLater(() -> {
                                 gridPane.setAlignment(Pos.CENTER);
                                 WordHuntGame.getInstance().getGameAreaPane().getChildren().clear();
                                 WordHuntGame.getInstance().getGameAreaPane().getChildren().setAll(gridPane);
+                            });
+                            break;
+                        case ACTIVATE_PANES:
+                            Platform.runLater(() -> {
+                                WordHuntGame.getInstance().getGameWordInsertionPane().setDisable(!message.isGamePanesActive());
+                                WordHuntGame.getInstance().getGameAreaPane().setDisable(!message.isGamePanesActive());
+                            });
+                            break;
+                        case CURRENT_PLAYER:
+                            Platform.runLater(() -> {
+                                WordHuntGame.getInstance().getTxtCurrentPlayer().setText("Sıra " + message.getMessage() + " adlı kullanıcıda");
                             });
                             break;
                     }
