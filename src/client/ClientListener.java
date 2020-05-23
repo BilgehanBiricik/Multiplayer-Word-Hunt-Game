@@ -8,6 +8,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
+import server.Player;
 import utils.tile.Tile;
 import utils.tile.TileButton;
 import utils.message.WHGPMessage;
@@ -44,6 +45,9 @@ public class ClientListener extends Thread {
                                 if (clientName.equals("")) this.clientName = message.getMessage();
                             });
                             break;
+                        case PLAYER_LIST:
+                            Platform.runLater(() -> WordHuntGame.getInstance().getListView().getItems().setAll(message.getPlayerList()));
+                            break;
                         case GET_GAME_INFO:
                             Platform.runLater(() ->
                             {
@@ -55,6 +59,13 @@ public class ClientListener extends Thread {
                                 wordHuntGameStage.setScene(new Scene(WordHuntGame.getInstance().loadGameScene(), 1100, 900));
                                 wordHuntGameStage.setTitle("Kelime Avı Oyunu");
                                 wordHuntGameStage.show();
+                                wordHuntGameStage.setOnCloseRequest(windowEvent -> {
+                                    try {
+                                        whgpClient.playerLeft(clientName);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                });
                                 parentStage.close();
                             });
                             break;
@@ -65,7 +76,6 @@ public class ClientListener extends Thread {
                                 alert.setHeaderText(message.getMessageHeader());
                                 alert.setContentText(message.getMessage());
                                 alert.show();
-
                             });
                             break;
                         case WORD_REJECTED:
@@ -124,6 +134,22 @@ public class ClientListener extends Thread {
                                 WordHuntGame.getInstance().getTxtCurrentPlayer().setText("Sıra " + message.getMessage() + " adlı kullanıcıda");
                                 WordHuntGame.getInstance().getGameWordInsertionPane().setDisable(!message.getMessage().equals(this.clientName));
                                 WordHuntGame.getInstance().getGameAreaPane().setDisable(!message.getMessage().equals(this.clientName));
+                            });
+                            break;
+                        case WINNER_OF_ROUND:
+                            Platform.runLater(() -> {
+                                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                                alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+                                alert.setHeaderText(message.getMessageHeader());
+                                alert.setContentText(message.getMessage());
+                                alert.show();
+                                alert.setOnCloseRequest(dialogEvent ->  {
+                                    try {
+                                        whgpClient.resetGame();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                });
                             });
                             break;
                     }

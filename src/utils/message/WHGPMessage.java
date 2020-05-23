@@ -12,7 +12,6 @@ public class WHGPMessage implements Serializable {
     private String message;
     private GameInfo gameInfo;
 
-    private boolean isGameStarted;
     private boolean isPlayerHost;
     private boolean gamePanesActive;
 
@@ -61,14 +60,6 @@ public class WHGPMessage implements Serializable {
 
     public void setGameInfo(GameInfo gameInfo) {
         this.gameInfo = gameInfo;
-    }
-
-    public boolean isGameStarted() {
-        return isGameStarted;
-    }
-
-    public void setGameStarted(boolean gameStarted) {
-        isGameStarted = gameStarted;
     }
 
     public boolean isPlayerHost() {

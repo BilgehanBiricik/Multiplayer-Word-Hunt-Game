@@ -42,7 +42,7 @@ public class PlayerManager {
         return players;
     }
 
-    public void setPlayers(ArrayList<Player> players) {
+    public synchronized void setPlayers(ArrayList<Player> players) {
         this.players = players;
     }
 
@@ -58,7 +58,7 @@ public class PlayerManager {
         return playerList;
     }
 
-    public void setPlayerList(ArrayList<String> playerList) {
+    public synchronized void setPlayerList(ArrayList<String> playerList) {
         this.playerList = playerList;
     }
 }

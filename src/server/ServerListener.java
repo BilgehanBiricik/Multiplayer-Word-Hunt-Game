@@ -1,5 +1,6 @@
 package server;
 
+import client.stage.WordHuntGame;
 import utils.tile.Tile;
 import utils.tile.TileType;
 import utils.message.WHGPMessage;
@@ -63,35 +64,9 @@ public class ServerListener extends Thread {
                             break;
                         case SET_GAME_INFO:
                             WHGPServer.getGame().setGameInfo(message.getGameInfo());
-                            WHGPServer.getGame().setTileArrayLists(new ArrayList<>());
-                            for (int i = 0; i < WHGPServer.getGame().getGameInfo().getGameAreaX(); i++) {
-                                WHGPServer.getGame().getTileArrayLists().add(new ArrayList<>());
-                                for (int j = 0; j < WHGPServer.getGame().getGameInfo().getGameAreaY(); j++) {
-                                    int position = i * WHGPServer.getGame().getGameInfo().getGameAreaX() + j;
-                                    Tile tile = new Tile();
-                                    if (WHGPServer.getGame().getGameInfo().getUnavailableTilesPositions().contains(position))
-                                        tile.setTileType(TileType.UNAVAILABLE);
-                                    if (WHGPServer.getGame().getGameInfo().getX2TilesPositions().contains(position))
-                                        tile.setTileType(TileType.X2);
-                                    if (WHGPServer.getGame().getGameInfo().getX3TilesPositions().contains(position))
-                                        tile.setTileType(TileType.X3);
 
-                                    tile.setPosX(i);
-                                    tile.setPosY(j);
-                                    tile.setLetter("");
-                                    WHGPServer.getGame().getTileArrayLists().get(i).add(tile);
-                                }
-                            }
-                            String pickedWord = WHGPServer.getGame().getDictionary().get((int) (Math.random() * (WHGPServer.getGame().getDictionary().size() + 1)));
-                            WHGPServer.getGame().getUsedWords().add(pickedWord.trim());
-                            for (int i = 0; i < pickedWord.length(); i++) {
-                                WHGPServer.getGame().getTileArrayLists().get((int) Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2.0))
-                                        .get((int) ((Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2.0) - (int) Math.ceil(pickedWord.length() / 2.0)) + i))
-                                        .setLetter(String.valueOf(pickedWord.charAt(i)));
-                                WHGPServer.getGame().getTileArrayLists().get((int) Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2.0))
-                                        .get((int) ((Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2.0) - (int) Math.ceil(pickedWord.length() / 2.0)) + i)).
-                                        setDisabled(true);
-                            }
+                            setTileGrid();
+
                             try {
                                 WHGPMessage msg = new WHGPMessage();
                                 msg.setWhgpMessageType(WHGPMessageType.GET_GAME_INFO);
@@ -170,7 +145,8 @@ public class ServerListener extends Thread {
                         case START_GAME:
                             WHGPServer.getGame().setGameStarted(true);
 
-                            WHGPServer.getGame().setCurrentPlayer(PlayerManager.getInstance().getPlayers().get(0));
+                            int playerQue = WHGPServer.getGame().getPlayerQue();
+                            WHGPServer.getGame().setCurrentPlayer(PlayerManager.getInstance().getPlayers().get(playerQue));
 
                             WHGPMessage msg = new WHGPMessage();
                             msg.setWhgpMessageType(WHGPMessageType.CURRENT_PLAYER);
@@ -189,10 +165,20 @@ public class ServerListener extends Thread {
                             if (!WHGPServer.getGame().getUsedWords().contains(word)
                                     && WHGPServer.getGame().getDictionary().contains(word)) {
 
-                                ArrayList<String> uw = WHGPServer.getGame().getUsedWords();
                                 WHGPServer.getGame().getUsedWords().add(stringBuilder.toString().trim());
 
+                                int x2Counter = 0, x3Counter = 0, disabledCounter = 0;
+
                                 for (int i = 0; i < message.getSelectedTiles().size(); i++) {
+
+                                    if (message.getSelectedTiles().get(i).getTileType() == TileType.X2)
+                                        x2Counter++;
+                                    else if (message.getSelectedTiles().get(i).getTileType() == TileType.X3)
+                                        x3Counter++;
+
+                                    if (message.getSelectedTiles().get(i).isDisabled())
+                                        disabledCounter++;
+
                                     WHGPServer.getGame().getTileArrayLists()
                                             .get(message.getSelectedTiles().get(i).getPosX())
                                             .get(message.getSelectedTiles().get(i).getPosY()).setLetter(message.getSelectedTiles()
@@ -202,10 +188,37 @@ public class ServerListener extends Thread {
                                             .get(message.getSelectedTiles().get(i).getPosY()).setDisabled(true);
                                 }
 
-                                int currentPlayerId = WHGPServer.getGame().getCurrentPlayer().getId();
-                                ++currentPlayerId;
-                                currentPlayerId %= PlayerManager.getInstance().getPlayers().size();
-                                WHGPServer.getGame().setCurrentPlayer(PlayerManager.getInstance().getPlayers().get(currentPlayerId));
+                                int calcPoint = (x3Counter != 0 ? (3 * x3Counter) : 1) * (x2Counter != 0 ? (2 * x2Counter) : 1) * (message.getSelectedTiles().size() - disabledCounter);
+                                player.setPoint(player.getPoint() + calcPoint);
+
+                                playerQue = WHGPServer.getGame().getPlayerQue();
+                                ++playerQue;
+                                playerQue %= PlayerManager.getInstance().getPlayers().size();
+                                WHGPServer.getGame().setCurrentPlayer(PlayerManager.getInstance().getPlayers().get(playerQue));
+                                WHGPServer.getGame().setPlayerQue(playerQue);
+
+                                if (player.getPoint() > WHGPServer.getGame().getGameInfo().getMaxPoint()) {
+
+                                    int prevPoint = player.getPoint();
+
+                                    player.setScore(player.getScore() + 1);
+
+                                    for (Player p : PlayerManager.getInstance().getPlayers()) {
+                                        p.setPoint(0);
+                                    }
+
+                                    WHGPServer.getGame().setPlayerQue(0);
+                                    WHGPServer.getGame().setCurrentPlayer(PlayerManager.getInstance().getPlayers().get(WHGPServer.getGame().getPlayerQue()));
+
+                                    msg = new WHGPMessage();
+                                    msg.setWhgpMessageType(WHGPMessageType.WINNER_OF_ROUND);
+                                    msg.setMessageHeader("Tur Bitti");
+                                    msg.setMessage("Bu turu kazanan " + player.getName() + " adlı oyuncu " + prevPoint + " puan alarak oldu.");
+                                    PlayerManager.getInstance().sendToPlayers(msg);
+
+                                    break;
+                                }
+
 
                                 msg = new WHGPMessage();
                                 msg.setWhgpMessageType(WHGPMessageType.CURRENT_PLAYER);
@@ -213,9 +226,15 @@ public class ServerListener extends Thread {
                                 PlayerManager.getInstance().sendToPlayers(msg);
 
                                 msg = new WHGPMessage();
+                                msg.setWhgpMessageType(WHGPMessageType.PLAYER_LIST);
+                                msg.setPlayerList(PlayerManager.getInstance().printAllPlayersAndStats());
+                                PlayerManager.getInstance().sendToPlayers(msg);
+
+                                msg = new WHGPMessage();
                                 msg.setWhgpMessageType(WHGPMessageType.GET_TILE_GRID);
                                 msg.setTileGird(WHGPServer.getGame().getTileArrayLists());
                                 PlayerManager.getInstance().sendToPlayers(msg);
+
 
                             } else {
                                 msg = new WHGPMessage();
@@ -226,6 +245,54 @@ public class ServerListener extends Thread {
                             }
 
                             break;
+                        case RESET_GAME:
+
+                            WHGPServer.getGame().setUsedWords(new ArrayList<>());
+
+                            setTileGrid();
+
+                            msg = new WHGPMessage();
+                            msg.setWhgpMessageType(WHGPMessageType.CURRENT_PLAYER);
+                            msg.setMessage(WHGPServer.getGame().getCurrentPlayer().getName());
+                            PlayerManager.getInstance().sendToPlayers(msg);
+
+                            msg = new WHGPMessage();
+                            msg.setWhgpMessageType(WHGPMessageType.PLAYER_LIST);
+                            msg.setPlayerList(PlayerManager.getInstance().printAllPlayersAndStats());
+                            PlayerManager.getInstance().sendToPlayers(msg);
+
+                            msg = new WHGPMessage();
+                            msg.setWhgpMessageType(WHGPMessageType.GET_TILE_GRID);
+                            msg.setTileGird(WHGPServer.getGame().getTileArrayLists());
+                            PlayerManager.getInstance().sendToPlayers(msg);
+                            break;
+                        case PLAYER_LEFT:
+                            int dp = 0;
+                            for (Player p : PlayerManager.getInstance().getPlayers()) {
+                                if (p.getName().equals(message.getMessage())) {
+                                    dp = p.getId();
+                                    break;
+                                }
+                            }
+
+                            PlayerManager.getInstance().disconnectPlayer(PlayerManager.getInstance().getPlayers().get(dp));
+
+                            playerQue = WHGPServer.getGame().getPlayerQue();
+                            ++playerQue;
+                            playerQue %= PlayerManager.getInstance().getPlayers().size();
+                            WHGPServer.getGame().setCurrentPlayer(PlayerManager.getInstance().getPlayers().get(playerQue));
+                            WHGPServer.getGame().setPlayerQue(playerQue);
+
+                            msg = new WHGPMessage();
+                            msg.setWhgpMessageType(WHGPMessageType.CURRENT_PLAYER);
+                            msg.setMessage(WHGPServer.getGame().getCurrentPlayer().getName());
+                            PlayerManager.getInstance().sendToPlayers(msg);
+
+                            msg = new WHGPMessage();
+                            msg.setWhgpMessageType(WHGPMessageType.PLAYER_LIST);
+                            msg.setPlayerList(PlayerManager.getInstance().printAllPlayersAndStats());
+                            PlayerManager.getInstance().sendToPlayers(msg);
+                            break;
                     }
 
                 }
@@ -234,6 +301,38 @@ public class ServerListener extends Thread {
             }
         }
 
+    }
+
+    private void setTileGrid() {
+        WHGPServer.getGame().setTileArrayLists(new ArrayList<>());
+        for (int i = 0; i < WHGPServer.getGame().getGameInfo().getGameAreaX(); i++) {
+            WHGPServer.getGame().getTileArrayLists().add(new ArrayList<>());
+            for (int j = 0; j < WHGPServer.getGame().getGameInfo().getGameAreaY(); j++) {
+                int position = i * WHGPServer.getGame().getGameInfo().getGameAreaX() + j;
+                Tile tile = new Tile();
+                if (WHGPServer.getGame().getGameInfo().getUnavailableTilesPositions().contains(position))
+                    tile.setTileType(TileType.UNAVAILABLE);
+                if (WHGPServer.getGame().getGameInfo().getX2TilesPositions().contains(position))
+                    tile.setTileType(TileType.X2);
+                if (WHGPServer.getGame().getGameInfo().getX3TilesPositions().contains(position))
+                    tile.setTileType(TileType.X3);
+
+                tile.setPosX(i);
+                tile.setPosY(j);
+                tile.setLetter("");
+                WHGPServer.getGame().getTileArrayLists().get(i).add(tile);
+            }
+        }
+        String pickedWord = WHGPServer.getGame().getDictionary().get((int) (Math.random() * (WHGPServer.getGame().getDictionary().size() + 1)));
+        WHGPServer.getGame().getUsedWords().add(pickedWord.trim());
+        for (int i = 0; i < pickedWord.length(); i++) {
+            WHGPServer.getGame().getTileArrayLists().get((int) Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2.0))
+                    .get((int) ((Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2.0) - (int) Math.ceil(pickedWord.length() / 2.0)) + i))
+                    .setLetter(String.valueOf(pickedWord.charAt(i)));
+            WHGPServer.getGame().getTileArrayLists().get((int) Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2.0))
+                    .get((int) ((Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2.0) - (int) Math.ceil(pickedWord.length() / 2.0)) + i)).
+                    setDisabled(true);
+        }
     }
 
     private synchronized void write(WHGPMessage message) throws IOException {

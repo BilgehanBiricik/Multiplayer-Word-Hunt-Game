@@ -2,8 +2,8 @@ package server;
 
 import utils.tile.Tile;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Scanner;
@@ -14,26 +14,31 @@ public class Game {
     private boolean isGameStarted;
 
     private Player currentPlayer;
+    private int playerQue;
 
     private ArrayList<ArrayList<Tile>> tileArrayLists;
     private ArrayList<String> dictionary;
     private ArrayList<String> usedWords;
 
 
-    public Game() throws FileNotFoundException {
+    public Game() throws IOException {
         isGameStarted = false;
         tileArrayLists = new ArrayList<>();
         usedWords = new ArrayList<>();
+        playerQue = 0;
         fillDictionary();
     }
 
-    private void fillDictionary() throws FileNotFoundException {
+    private void fillDictionary() throws IOException {
         dictionary = new ArrayList<>();
-        File file = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("dictionary.txt")).getFile());
-        Scanner resourceReader = new Scanner(file);
 
-        while (resourceReader.hasNext())
-            dictionary.add(resourceReader.nextLine());
+        BufferedReader bufferedReader = new BufferedReader(new FileReader("resources/dictionary.txt"));
+        String line = bufferedReader.readLine();
+        while (line != null) {
+            dictionary.add(line);
+            line = bufferedReader.readLine();
+        }
+        bufferedReader.close();
     }
 
     public GameInfo getGameInfo() {
@@ -82,5 +87,13 @@ public class Game {
 
     public void setCurrentPlayer(Player currentPlayer) {
         this.currentPlayer = currentPlayer;
+    }
+
+    public int getPlayerQue() {
+        return playerQue;
+    }
+
+    public void setPlayerQue(int playerQue) {
+        this.playerQue = playerQue;
     }
 }

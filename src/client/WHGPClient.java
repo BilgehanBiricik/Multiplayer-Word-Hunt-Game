@@ -49,7 +49,6 @@ public class WHGPClient {
     public void startGame() throws IOException {
         WHGPMessage msg = new WHGPMessage();
         msg.setWhgpMessageType(WHGPMessageType.START_GAME);
-        msg.setGameStarted(true);
         write(msg);
     }
 
@@ -57,6 +56,19 @@ public class WHGPClient {
         WHGPMessage msg = new WHGPMessage();
         msg.setWhgpMessageType(WHGPMessageType.SEND_WORD);
         msg.setSelectedTiles(selectedTiles);
+        write(msg);
+    }
+
+    public void resetGame() throws IOException {
+        WHGPMessage msg = new WHGPMessage();
+        msg.setWhgpMessageType(WHGPMessageType.RESET_GAME);
+        write(msg);
+    }
+
+    public void playerLeft(String clientName) throws IOException {
+        WHGPMessage msg = new WHGPMessage();
+        msg.setWhgpMessageType(WHGPMessageType.PLAYER_LEFT);
+        msg.setMessage(clientName);
         write(msg);
     }
 
