@@ -67,7 +67,7 @@ public class WHGPClient {
 
     public void playerLeft(String clientName) throws IOException {
         WHGPMessage msg = new WHGPMessage();
-        msg.setWhgpMessageType(WHGPMessageType.PLAYER_LEFT);
+        msg.setWhgpMessageType(WHGPMessageType.CLIENT_QUIT);
         msg.setMessage(clientName);
         write(msg);
     }
@@ -75,7 +75,7 @@ public class WHGPClient {
     private void write(WHGPMessage message) throws IOException {
         out.writeUnshared(message);
         out.reset();
-        // Why I didn't use writeObject and flush functions? The answer is:
+        // Why I didn't use writeObject and flush functions? The answer is in this link:
         // https://stackoverflow.com/questions/8089583/why-is-javas-object-stream-returning-the-same-object-each-time-i-call-readobjec
     }
 }

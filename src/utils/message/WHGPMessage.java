@@ -14,6 +14,7 @@ public class WHGPMessage implements Serializable {
 
     private boolean isPlayerHost;
     private boolean gamePanesActive;
+    private boolean isGameStarted;
 
     private ArrayList<ArrayList<Tile>> tileGird;
     private ArrayList<Tile> selectedTiles;
@@ -92,5 +93,13 @@ public class WHGPMessage implements Serializable {
 
     public void setGamePanesActive(boolean gamePanesActive) {
         this.gamePanesActive = gamePanesActive;
+    }
+
+    public boolean isGameStarted() {
+        return isGameStarted;
+    }
+
+    public void setGameStarted(boolean gameStarted) {
+        isGameStarted = gameStarted;
     }
 }

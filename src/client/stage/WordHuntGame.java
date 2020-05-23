@@ -27,8 +27,6 @@ public class WordHuntGame {
     private String word;
     private Tile lastSelectedTile;
     private ArrayList<Tile> wordToTileArrayList;
-    private int wordIndex;
-    private boolean foundFlag;
 
     private GameInfo gameInfo;
     private WHGPClient whgpClient;
@@ -106,7 +104,6 @@ public class WordHuntGame {
         btnStartGame.setOnAction(actionEvent -> {
             try {
                 whgpClient.startGame();
-                btnStartGame.setDisable(true);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -164,28 +161,68 @@ public class WordHuntGame {
 
         Button btnSend = new Button("Gönder");
         btnSend.setOnAction(actionEvent -> {
+            int wordIndex = 0;
+            boolean foundFlag = false;
             if (!word.equals("") && lastSelectedTile != null) {
-                wordIndex = 0;
-                foundFlag = false;
 
                 if ((lastSelectedTile.getPosY() - (word.length() - 1)) >= 0)
-                    for (int i = (lastSelectedTile.getPosY() - (word.length() - 1)); i <= lastSelectedTile.getPosY(); i++) { // RIGHT TO LEFT SEARCH
-                        findWordInGrid(i, lastSelectedTile.getPosX());
+                    for (int i = (lastSelectedTile.getPosY() - (word.length() - 1)); i <= lastSelectedTile.getPosY(); i++) { // LEFT TO RIGHT
+                        TileButton tileButton = getTileButtonFromGridPane(gameAreaPane, i, lastSelectedTile.getPosX());
+                        if (tileButton.getTile().getLetter().equals(String.valueOf(word.charAt(wordIndex)))) {
+                            wordToTileArrayList.add(tileButton.getTile());
+                            wordIndex++;
+                            foundFlag = true;
+                        } else {
+                            wordIndex = 0;
+                            foundFlag = false;
+                            wordToTileArrayList = new ArrayList<>();
+                            break;
+                        }
                     }
 
-                if (!foundFlag && (lastSelectedTile.getPosY() + (word.length() - 1)) <= gameInfo.getGameAreaX())
-                    for (int i = (lastSelectedTile.getPosY() + (word.length() - 1)); i >= lastSelectedTile.getPosY(); i--) { // LEFT TO RIGHT SEARCH
-                        findWordInGrid(i, lastSelectedTile.getPosX());
+                if (!foundFlag && (lastSelectedTile.getPosY() + (word.length() - 1)) < gameInfo.getGameAreaX())
+                    for (int i = (lastSelectedTile.getPosY() + (word.length() - 1)); i >= lastSelectedTile.getPosY(); i--) { // RIGHT TO LEFT
+                        TileButton tileButton = getTileButtonFromGridPane(gameAreaPane, i, lastSelectedTile.getPosX());
+                        if (tileButton.getTile().getLetter().equals(String.valueOf(word.charAt(wordIndex)))) {
+                            wordToTileArrayList.add(tileButton.getTile());
+                            wordIndex++;
+                            foundFlag = true;
+                        } else {
+                            wordIndex = 0;
+                            foundFlag = false;
+                            wordToTileArrayList = new ArrayList<>();
+                            break;
+                        }
                     }
 
                 if (!foundFlag && ((lastSelectedTile.getPosX() - (word.length() - 1)) >= 0))
-                    for (int i = (lastSelectedTile.getPosX() - (word.length() - 1)); i <= lastSelectedTile.getPosX(); i++) { // TOP TO BOTTOM SEARCH
-                        findWordInGrid(lastSelectedTile.getPosY(), i);
+                    for (int i = (lastSelectedTile.getPosX() - (word.length() - 1)); i <= lastSelectedTile.getPosX(); i++) { // TOP TO BOTTOM
+                        TileButton tileButton = getTileButtonFromGridPane(gameAreaPane, lastSelectedTile.getPosY(), i);
+                        if (tileButton.getTile().getLetter().equals(String.valueOf(word.charAt(wordIndex)))) {
+                            wordToTileArrayList.add(tileButton.getTile());
+                            wordIndex++;
+                            foundFlag = true;
+                        } else {
+                            wordIndex = 0;
+                            foundFlag = false;
+                            wordToTileArrayList = new ArrayList<>();
+                            break;
+                        }
                     }
 
-                if (!foundFlag && ((lastSelectedTile.getPosX() + (word.length() - 1)) <= gameInfo.getGameAreaY()))
-                    for (int i = (lastSelectedTile.getPosX() + (word.length() - 1)); i >= lastSelectedTile.getPosX(); i--) { // BOTTOM TO TOP SEARCH
-                        findWordInGrid(lastSelectedTile.getPosY(), i);
+                if (!foundFlag && ((lastSelectedTile.getPosX() + (word.length() - 1)) < gameInfo.getGameAreaY()))
+                    for (int i = (lastSelectedTile.getPosX() + (word.length() - 1)); i >= lastSelectedTile.getPosX(); i--) { // BOTTOM TO TOP
+                        TileButton tileButton = getTileButtonFromGridPane(gameAreaPane, lastSelectedTile.getPosY(), i);
+                        if (tileButton.getTile().getLetter().equals(String.valueOf(word.charAt(wordIndex)))) {
+                            wordToTileArrayList.add(tileButton.getTile());
+                            wordIndex++;
+                            foundFlag = true;
+                        } else {
+                            wordIndex = 0;
+                            foundFlag = false;
+                            wordToTileArrayList = new ArrayList<>();
+                            break;
+                        }
                     }
 
                 StringBuilder stringBuilder = new StringBuilder();
@@ -195,18 +232,22 @@ public class WordHuntGame {
                 System.out.println(stringBuilder);
                 System.out.println(word);
 
-                boolean flag = false;
-                for (Tile tile: wordToTileArrayList) {
+                boolean disableFlag = false;
+                for (Tile tile : wordToTileArrayList) {
                     if (tile.isDisabled()) {
-                        flag = true;
+                        disableFlag = true;
                         break;
                     }
                 }
 
-                if (stringBuilder.toString().equals(word) && flag) {
+                if (stringBuilder.toString().equals(word) && disableFlag) {
                     try {
                         System.out.println(wordToTileArrayList);
                         whgpClient.sendWord(wordToTileArrayList);
+
+                        wordIndex = 0;
+                        txtFieldWord.clear();
+                        word = "";
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -216,6 +257,7 @@ public class WordHuntGame {
                     alert.setHeaderText("Dikkat");
                     alert.setContentText("Girmiş olduğunuz kelime ile alana yerleştirdiğiniz aynı değil veya kelime uygun yere girilmedi.");
                     alert.show();
+
                 }
 
             } else {
@@ -226,10 +268,9 @@ public class WordHuntGame {
                 alert.show();
             }
 
-            wordIndex = 0;
             foundFlag = false;
             wordToTileArrayList = new ArrayList<>();
-            txtFieldWord.clear();
+
         });
 
         hBox.setSpacing(10);
@@ -250,20 +291,6 @@ public class WordHuntGame {
             }
         }
         return null;
-    }
-
-    private void findWordInGrid(int col, int row) {
-        TileButton tileButton = getTileButtonFromGridPane(gameAreaPane, col, row);
-        if (tileButton.getTile().getLetter().equals(String.valueOf(word.charAt(wordIndex)))) {
-            wordToTileArrayList.add(tileButton.getTile());
-            wordIndex++;
-            foundFlag = true;
-        } else {
-            wordIndex = 0;
-            foundFlag = false;
-            wordToTileArrayList = new ArrayList<>();
-            return;
-        }
     }
 
     public ListView<String> getListView() {

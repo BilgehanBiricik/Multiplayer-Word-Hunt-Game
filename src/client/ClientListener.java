@@ -20,6 +20,7 @@ public class ClientListener extends Thread {
     private ObjectInputStream in;
     private WHGPClient whgpClient;
     private static Stage parentStage;
+    private Stage wordHuntGameStage;
 
     private String clientName;
 
@@ -55,7 +56,7 @@ public class ClientListener extends Thread {
                                 WordHuntGame.getInstance().setWhgpClient(whgpClient);
                                 WordHuntGame.getInstance().getBtnStartGame().setVisible(message.isPlayerHost());
 
-                                Stage wordHuntGameStage = new Stage();
+                                wordHuntGameStage = new Stage();
                                 wordHuntGameStage.setScene(new Scene(WordHuntGame.getInstance().loadGameScene(), 1100, 900));
                                 wordHuntGameStage.setTitle("Kelime Avı Oyunu");
                                 wordHuntGameStage.show();
@@ -81,6 +82,7 @@ public class ClientListener extends Thread {
                         case WORD_REJECTED:
                         case GAME_IS_STARTED:
                         case MAX_PLAYER_LIMIT:
+                        case PLAYER_LEFT:
                             Platform.runLater(() -> {
                                 Alert alert = new Alert(Alert.AlertType.WARNING);
                                 alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
@@ -150,6 +152,28 @@ public class ClientListener extends Thread {
                                         e.printStackTrace();
                                     }
                                 });
+                            });
+                            break;
+                        case WINNER_OF_GAME:
+                            Platform.runLater(() -> {
+                                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                                alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+                                alert.setHeaderText(message.getMessageHeader());
+                                alert.setContentText(message.getMessage());
+                                alert.show();
+                                alert.setOnCloseRequest(dialogEvent ->  {
+                                    wordHuntGameStage.close();
+                                });
+                            });
+                            break;
+                        case MIN_PLAYER_LIMIT:
+                            Platform.runLater(() -> {
+                                Alert alert = new Alert(Alert.AlertType.WARNING);
+                                alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+                                alert.setHeaderText(message.getMessageHeader());
+                                alert.setContentText(message.getMessage());
+                                alert.show();
+                                WordHuntGame.getInstance().getBtnStartGame().setDisable(message.isGameStarted());
                             });
                             break;
                     }

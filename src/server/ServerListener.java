@@ -143,6 +143,16 @@ public class ServerListener extends Thread {
                             }
                             break;
                         case START_GAME:
+                            if (PlayerManager.getInstance().getPlayers().size() <= 1) {
+                                WHGPMessage msg = new WHGPMessage();
+                                msg.setWhgpMessageType(WHGPMessageType.MIN_PLAYER_LIMIT);
+                                msg.setMessageHeader("Uyarı");
+                                msg.setMessage("Oyuna başlamak için minumum 2 oyuncu gerekli.");
+                                msg.setGameStarted(false);
+                                write(msg);
+                                break;
+                            }
+
                             WHGPServer.getGame().setGameStarted(true);
 
                             int playerQue = WHGPServer.getGame().getPlayerQue();
@@ -198,7 +208,6 @@ public class ServerListener extends Thread {
                                 WHGPServer.getGame().setPlayerQue(playerQue);
 
                                 if (player.getPoint() > WHGPServer.getGame().getGameInfo().getMaxPoint()) {
-
                                     int prevPoint = player.getPoint();
 
                                     player.setScore(player.getScore() + 1);
@@ -210,13 +219,22 @@ public class ServerListener extends Thread {
                                     WHGPServer.getGame().setPlayerQue(0);
                                     WHGPServer.getGame().setCurrentPlayer(PlayerManager.getInstance().getPlayers().get(WHGPServer.getGame().getPlayerQue()));
 
+                                    if (player.getScore() == WHGPServer.getGame().getGameInfo().getTotalGame()) {
+                                        msg = new WHGPMessage();
+                                        msg.setWhgpMessageType(WHGPMessageType.WINNER_OF_GAME);
+                                        msg.setMessageHeader("Oyun Bitti");
+                                        msg.setMessage("Oyunu kazanan " + player.getName() + " adlı kullanıcı oldu. Oyun kapatılıyor.");
+                                        PlayerManager.getInstance().sendToPlayers(msg);
+
+                                    }
+
                                     msg = new WHGPMessage();
                                     msg.setWhgpMessageType(WHGPMessageType.WINNER_OF_ROUND);
                                     msg.setMessageHeader("Tur Bitti");
                                     msg.setMessage("Bu turu kazanan " + player.getName() + " adlı oyuncu " + prevPoint + " puan alarak oldu.");
                                     PlayerManager.getInstance().sendToPlayers(msg);
 
-                                    break;
+
                                 }
 
 
@@ -266,31 +284,41 @@ public class ServerListener extends Thread {
                             msg.setTileGird(WHGPServer.getGame().getTileArrayLists());
                             PlayerManager.getInstance().sendToPlayers(msg);
                             break;
-                        case PLAYER_LEFT:
-                            int dp = 0;
+                        case CLIENT_QUIT:
+                            Player player = null;
                             for (Player p : PlayerManager.getInstance().getPlayers()) {
                                 if (p.getName().equals(message.getMessage())) {
-                                    dp = p.getId();
+                                    player = p;
                                     break;
                                 }
                             }
 
-                            PlayerManager.getInstance().disconnectPlayer(PlayerManager.getInstance().getPlayers().get(dp));
+                            PlayerManager.getInstance().disconnectPlayer(PlayerManager.getInstance().getPlayers().get(player.getId()));
 
-                            playerQue = WHGPServer.getGame().getPlayerQue();
-                            ++playerQue;
-                            playerQue %= PlayerManager.getInstance().getPlayers().size();
-                            WHGPServer.getGame().setCurrentPlayer(PlayerManager.getInstance().getPlayers().get(playerQue));
-                            WHGPServer.getGame().setPlayerQue(playerQue);
+                            if (WHGPServer.getGame().isGameStarted() && WHGPServer.getGame().getCurrentPlayer().getName().equals(player.getName())) {
+                                playerQue = WHGPServer.getGame().getPlayerQue();
+                                ++playerQue;
+                                playerQue %= PlayerManager.getInstance().getPlayers().size();
+                                WHGPServer.getGame().setCurrentPlayer(PlayerManager.getInstance().getPlayers().get(playerQue));
+                                WHGPServer.getGame().setPlayerQue(playerQue);
+                            }
 
-                            msg = new WHGPMessage();
-                            msg.setWhgpMessageType(WHGPMessageType.CURRENT_PLAYER);
-                            msg.setMessage(WHGPServer.getGame().getCurrentPlayer().getName());
-                            PlayerManager.getInstance().sendToPlayers(msg);
+                            if (WHGPServer.getGame().isGameStarted()) {
+                                msg = new WHGPMessage();
+                                msg.setWhgpMessageType(WHGPMessageType.CURRENT_PLAYER);
+                                msg.setMessage(WHGPServer.getGame().getCurrentPlayer().getName());
+                                PlayerManager.getInstance().sendToPlayers(msg);
+                            }
 
                             msg = new WHGPMessage();
                             msg.setWhgpMessageType(WHGPMessageType.PLAYER_LIST);
                             msg.setPlayerList(PlayerManager.getInstance().printAllPlayersAndStats());
+                            PlayerManager.getInstance().sendToPlayers(msg);
+
+                            msg = new WHGPMessage();
+                            msg.setWhgpMessageType(WHGPMessageType.PLAYER_LEFT);
+                            msg.setMessageHeader("Uyarı");
+                            msg.setMessage(message.getMessage() + " adlı kullanıcı oyundan çıkış yaptı.");
                             PlayerManager.getInstance().sendToPlayers(msg);
                             break;
                     }
