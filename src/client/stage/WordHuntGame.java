@@ -104,6 +104,7 @@ public class WordHuntGame {
         btnStartGame.setOnAction(actionEvent -> {
             try {
                 whgpClient.startGame();
+                btnStartGame.setDisable(true);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -163,6 +164,7 @@ public class WordHuntGame {
         btnSend.setOnAction(actionEvent -> {
             int wordIndex = 0;
             boolean foundFlag = false;
+            wordToTileArrayList = new ArrayList<>();
             if (!word.equals("") && lastSelectedTile != null) {
 
                 if ((lastSelectedTile.getPosY() - (word.length() - 1)) >= 0)
@@ -267,9 +269,6 @@ public class WordHuntGame {
                 alert.setContentText("Lütfen kelimenizi kutucuğa girin ve daha sonra oyun alanına yerleştirin.");
                 alert.show();
             }
-
-            foundFlag = false;
-            wordToTileArrayList = new ArrayList<>();
 
         });
 

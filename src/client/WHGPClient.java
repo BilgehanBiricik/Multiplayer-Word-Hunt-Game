@@ -59,9 +59,10 @@ public class WHGPClient {
         write(msg);
     }
 
-    public void resetGame() throws IOException {
+    public void resetGame(boolean reset) throws IOException {
         WHGPMessage msg = new WHGPMessage();
-        msg.setWhgpMessageType(WHGPMessageType.RESET_GAME);
+        msg.setWhgpMessageType(WHGPMessageType.RESET_ROUND);
+        msg.setResetRound(reset);
         write(msg);
     }
 

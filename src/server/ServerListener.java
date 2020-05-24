@@ -1,6 +1,5 @@
 package server;
 
-import client.stage.WordHuntGame;
 import utils.tile.Tile;
 import utils.tile.TileType;
 import utils.message.WHGPMessage;
@@ -62,6 +61,7 @@ public class ServerListener extends Thread {
 
                             }
                             break;
+
                         case SET_GAME_INFO:
                             WHGPServer.getGame().setGameInfo(message.getGameInfo());
 
@@ -82,6 +82,7 @@ public class ServerListener extends Thread {
                                 e.printStackTrace();
                             }
                             break;
+
                         case JOIN_REQUEST:
                             if (!WHGPServer.getGame().isGameStarted()) {
                                 if (PlayerManager.getInstance().getPlayerList().size() < WHGPServer.getMaxPlayer()) {
@@ -142,13 +143,13 @@ public class ServerListener extends Thread {
                                 write(msg);
                             }
                             break;
+
                         case START_GAME:
                             if (PlayerManager.getInstance().getPlayers().size() <= 1) {
                                 WHGPMessage msg = new WHGPMessage();
                                 msg.setWhgpMessageType(WHGPMessageType.MIN_PLAYER_LIMIT);
                                 msg.setMessageHeader("Uyarı");
                                 msg.setMessage("Oyuna başlamak için minumum 2 oyuncu gerekli.");
-                                msg.setGameStarted(false);
                                 write(msg);
                                 break;
                             }
@@ -230,8 +231,7 @@ public class ServerListener extends Thread {
 
                                     msg = new WHGPMessage();
                                     msg.setWhgpMessageType(WHGPMessageType.WINNER_OF_ROUND);
-                                    msg.setMessageHeader("Tur Bitti");
-                                    msg.setMessage("Bu turu kazanan " + player.getName() + " adlı oyuncu " + prevPoint + " puan alarak oldu.");
+                                    msg.setMessage(player.getName());
                                     PlayerManager.getInstance().sendToPlayers(msg);
 
 
@@ -260,14 +260,20 @@ public class ServerListener extends Thread {
                                 msg.setMessageHeader("Hata");
                                 msg.setMessage("Girmiş olduğunuz kelime uygun değil veya daha önceden girilmiş. Lütfen farklı bir kelime giriniz.");
                                 write(msg);
+
+                                msg = new WHGPMessage();
+                                msg.setWhgpMessageType(WHGPMessageType.GET_TILE_GRID);
+                                msg.setTileGird(WHGPServer.getGame().getTileArrayLists());
+                                PlayerManager.getInstance().sendToPlayers(msg);
                             }
 
                             break;
-                        case RESET_GAME:
+
+                        case RESET_ROUND:
 
                             WHGPServer.getGame().setUsedWords(new ArrayList<>());
 
-                            setTileGrid();
+                            if (message.isResetRound()) setTileGrid();
 
                             msg = new WHGPMessage();
                             msg.setWhgpMessageType(WHGPMessageType.CURRENT_PLAYER);
@@ -284,6 +290,7 @@ public class ServerListener extends Thread {
                             msg.setTileGird(WHGPServer.getGame().getTileArrayLists());
                             PlayerManager.getInstance().sendToPlayers(msg);
                             break;
+
                         case CLIENT_QUIT:
                             Player player = null;
                             for (Player p : PlayerManager.getInstance().getPlayers()) {
@@ -294,6 +301,7 @@ public class ServerListener extends Thread {
                             }
 
                             PlayerManager.getInstance().disconnectPlayer(PlayerManager.getInstance().getPlayers().get(player.getId()));
+                            PlayerManager.getInstance().getPlayerList().remove(player.getName());
 
                             if (WHGPServer.getGame().isGameStarted() && WHGPServer.getGame().getCurrentPlayer().getName().equals(player.getName())) {
                                 playerQue = WHGPServer.getGame().getPlayerQue();
@@ -301,14 +309,13 @@ public class ServerListener extends Thread {
                                 playerQue %= PlayerManager.getInstance().getPlayers().size();
                                 WHGPServer.getGame().setCurrentPlayer(PlayerManager.getInstance().getPlayers().get(playerQue));
                                 WHGPServer.getGame().setPlayerQue(playerQue);
-                            }
 
-                            if (WHGPServer.getGame().isGameStarted()) {
                                 msg = new WHGPMessage();
                                 msg.setWhgpMessageType(WHGPMessageType.CURRENT_PLAYER);
                                 msg.setMessage(WHGPServer.getGame().getCurrentPlayer().getName());
                                 PlayerManager.getInstance().sendToPlayers(msg);
                             }
+
 
                             msg = new WHGPMessage();
                             msg.setWhgpMessageType(WHGPMessageType.PLAYER_LIST);

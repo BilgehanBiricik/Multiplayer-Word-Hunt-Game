@@ -15,6 +15,7 @@ public class WHGPMessage implements Serializable {
     private boolean isPlayerHost;
     private boolean gamePanesActive;
     private boolean isGameStarted;
+    private boolean resetRound;
 
     private ArrayList<ArrayList<Tile>> tileGird;
     private ArrayList<Tile> selectedTiles;
@@ -22,7 +23,7 @@ public class WHGPMessage implements Serializable {
 
     public WHGPMessage() {
     }
-    
+
     public WHGPMessageType getWhgpMessageType() {
         return whgpMessageType;
     }
@@ -101,5 +102,13 @@ public class WHGPMessage implements Serializable {
 
     public void setGameStarted(boolean gameStarted) {
         isGameStarted = gameStarted;
+    }
+
+    public boolean isResetRound() {
+        return resetRound;
+    }
+
+    public void setResetRound(boolean resetRound) {
+        this.resetRound = resetRound;
     }
 }

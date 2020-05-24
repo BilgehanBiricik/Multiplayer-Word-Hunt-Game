@@ -142,12 +142,12 @@ public class ClientListener extends Thread {
                             Platform.runLater(() -> {
                                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                                 alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
-                                alert.setHeaderText(message.getMessageHeader());
-                                alert.setContentText(message.getMessage());
+                                alert.setHeaderText("Tur Bitti");
+                                alert.setContentText("Bu turu kazanan " + message.getMessage() + " adlı oyuncu oldu.");
                                 alert.show();
                                 alert.setOnCloseRequest(dialogEvent ->  {
                                     try {
-                                        whgpClient.resetGame();
+                                        whgpClient.resetGame(clientName.equals(message.getMessage()));
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
@@ -173,7 +173,7 @@ public class ClientListener extends Thread {
                                 alert.setHeaderText(message.getMessageHeader());
                                 alert.setContentText(message.getMessage());
                                 alert.show();
-                                WordHuntGame.getInstance().getBtnStartGame().setDisable(message.isGameStarted());
+                                WordHuntGame.getInstance().getBtnStartGame().setDisable(false);
                             });
                             break;
                     }

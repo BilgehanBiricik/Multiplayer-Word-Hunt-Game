@@ -14,6 +14,6 @@ public enum WHGPMessageType {
     PLAYER_LEFT,
     PLAYER_LIST,
     CURRENT_PLAYER,
-    RESET_GAME,
+    RESET_ROUND,
     WINNER_OF_ROUND, WINNER_OF_GAME
 }
