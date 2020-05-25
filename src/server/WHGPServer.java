@@ -1,6 +1,7 @@
 package server;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -23,7 +24,7 @@ public class WHGPServer extends Thread {
 
     @Override
     public void run() {
-        try (ServerSocket serverSocket = new ServerSocket(Integer.parseInt(port))) {
+        try (ServerSocket serverSocket = new ServerSocket(Integer.parseInt(port), 50, InetAddress.getByName(ip))) {
             System.out.println("The server is running...");
             while (true) {
                 Socket socket = serverSocket.accept();

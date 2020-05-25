@@ -182,13 +182,12 @@ public class ServerListener extends Thread {
 
                                 for (int i = 0; i < message.getSelectedTiles().size(); i++) {
 
-                                    if (message.getSelectedTiles().get(i).getTileType() == TileType.X2)
+                                    if (message.getSelectedTiles().get(i).isDisabled())
+                                        disabledCounter++;
+                                    else if (message.getSelectedTiles().get(i).getTileType() == TileType.X2)
                                         x2Counter++;
                                     else if (message.getSelectedTiles().get(i).getTileType() == TileType.X3)
                                         x3Counter++;
-
-                                    if (message.getSelectedTiles().get(i).isDisabled())
-                                        disabledCounter++;
 
                                     WHGPServer.getGame().getTileArrayLists()
                                             .get(message.getSelectedTiles().get(i).getPosX())
@@ -203,13 +202,17 @@ public class ServerListener extends Thread {
                                 player.setPoint(player.getPoint() + calcPoint);
 
                                 playerQue = WHGPServer.getGame().getPlayerQue();
-                                ++playerQue;
+                                playerQue++;
                                 playerQue %= PlayerManager.getInstance().getPlayers().size();
                                 WHGPServer.getGame().setCurrentPlayer(PlayerManager.getInstance().getPlayers().get(playerQue));
                                 WHGPServer.getGame().setPlayerQue(playerQue);
 
-                                if (player.getPoint() > WHGPServer.getGame().getGameInfo().getMaxPoint()) {
-                                    int prevPoint = player.getPoint();
+                                msg = new WHGPMessage();
+                                msg.setWhgpMessageType(WHGPMessageType.PLAYER_LIST);
+                                msg.setPlayerList(PlayerManager.getInstance().printAllPlayersAndStats());
+                                PlayerManager.getInstance().sendToPlayers(msg);
+
+                                if (player.getPoint() >= WHGPServer.getGame().getGameInfo().getMaxPoint()) {
 
                                     player.setScore(player.getScore() + 1);
 
@@ -234,18 +237,13 @@ public class ServerListener extends Thread {
                                     msg.setMessage(player.getName());
                                     PlayerManager.getInstance().sendToPlayers(msg);
 
-
+                                    break;
                                 }
 
 
                                 msg = new WHGPMessage();
                                 msg.setWhgpMessageType(WHGPMessageType.CURRENT_PLAYER);
                                 msg.setMessage(WHGPServer.getGame().getCurrentPlayer().getName());
-                                PlayerManager.getInstance().sendToPlayers(msg);
-
-                                msg = new WHGPMessage();
-                                msg.setWhgpMessageType(WHGPMessageType.PLAYER_LIST);
-                                msg.setPlayerList(PlayerManager.getInstance().printAllPlayersAndStats());
                                 PlayerManager.getInstance().sendToPlayers(msg);
 
                                 msg = new WHGPMessage();
@@ -300,13 +298,13 @@ public class ServerListener extends Thread {
                                 }
                             }
 
-                            PlayerManager.getInstance().disconnectPlayer(PlayerManager.getInstance().getPlayers().get(player.getId()));
+
+                            PlayerManager.getInstance().disconnectPlayer(player);
                             PlayerManager.getInstance().getPlayerList().remove(player.getName());
 
                             if (WHGPServer.getGame().isGameStarted() && WHGPServer.getGame().getCurrentPlayer().getName().equals(player.getName())) {
                                 playerQue = WHGPServer.getGame().getPlayerQue();
-                                ++playerQue;
-                                playerQue %= PlayerManager.getInstance().getPlayers().size();
+
                                 WHGPServer.getGame().setCurrentPlayer(PlayerManager.getInstance().getPlayers().get(playerQue));
                                 WHGPServer.getGame().setPlayerQue(playerQue);
 
@@ -315,7 +313,6 @@ public class ServerListener extends Thread {
                                 msg.setMessage(WHGPServer.getGame().getCurrentPlayer().getName());
                                 PlayerManager.getInstance().sendToPlayers(msg);
                             }
-
 
                             msg = new WHGPMessage();
                             msg.setWhgpMessageType(WHGPMessageType.PLAYER_LIST);
@@ -339,17 +336,28 @@ public class ServerListener extends Thread {
     }
 
     private void setTileGrid() {
+
+        int gameArea = WHGPServer.getGame().getGameInfo().getGameAreaX() * WHGPServer.getGame().getGameInfo().getGameAreaY();
+
+        ArrayList<Integer> unavailableTilesPositions = new ArrayList<>();
+        ArrayList<Integer> x2TilesPositions = new ArrayList<>();
+        ArrayList<Integer> x3TilesPositions = new ArrayList<>();
+
+        unavailableTilesPositions = randomNumbersArray(unavailableTilesPositions, x2TilesPositions, x3TilesPositions, WHGPServer.getGame().getGameInfo().getUnavailableTiles(), gameArea);
+        x2TilesPositions = randomNumbersArray(unavailableTilesPositions, x2TilesPositions, x3TilesPositions, WHGPServer.getGame().getGameInfo().getX2Tiles(), gameArea);
+        x3TilesPositions = randomNumbersArray(unavailableTilesPositions, x2TilesPositions, x3TilesPositions, WHGPServer.getGame().getGameInfo().getX3Tiles(), gameArea);
+
         WHGPServer.getGame().setTileArrayLists(new ArrayList<>());
         for (int i = 0; i < WHGPServer.getGame().getGameInfo().getGameAreaX(); i++) {
             WHGPServer.getGame().getTileArrayLists().add(new ArrayList<>());
             for (int j = 0; j < WHGPServer.getGame().getGameInfo().getGameAreaY(); j++) {
                 int position = i * WHGPServer.getGame().getGameInfo().getGameAreaX() + j;
                 Tile tile = new Tile();
-                if (WHGPServer.getGame().getGameInfo().getUnavailableTilesPositions().contains(position))
+                if (unavailableTilesPositions.contains(position))
                     tile.setTileType(TileType.UNAVAILABLE);
-                if (WHGPServer.getGame().getGameInfo().getX2TilesPositions().contains(position))
+                if (x2TilesPositions.contains(position))
                     tile.setTileType(TileType.X2);
-                if (WHGPServer.getGame().getGameInfo().getX3TilesPositions().contains(position))
+                if (x3TilesPositions.contains(position))
                     tile.setTileType(TileType.X3);
 
                 tile.setPosX(i);
@@ -368,6 +376,22 @@ public class ServerListener extends Thread {
                     .get((int) ((Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2.0) - (int) Math.ceil(pickedWord.length() / 2.0)) + i)).
                     setDisabled(true);
         }
+    }
+
+    private ArrayList<Integer> randomNumbersArray(ArrayList<Integer> unavailableTilesPositions, ArrayList<Integer> x2TilesPositions, ArrayList<Integer> x3TilesPositions, int length, int max) {
+        ArrayList<Integer> arrayList = new ArrayList<>();
+        for (int i = 0; i < length; i++) {
+            int randPosition = (int) (Math.random() * (max + 1));
+            while (arrayList.contains(randPosition)
+                    || unavailableTilesPositions.contains(randPosition)
+                    || x2TilesPositions.contains(randPosition)
+                    || x3TilesPositions.contains(randPosition)
+                    || (randPosition >= (WHGPServer.getGame().getGameInfo().getGameAreaX() * Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2.0))
+                    && randPosition <= (WHGPServer.getGame().getGameInfo().getGameAreaX() * Math.ceil(WHGPServer.getGame().getGameInfo().getGameAreaX() / 2.0) + WHGPServer.getGame().getGameInfo().getGameAreaX())))
+                randPosition = (int) (Math.random() * (max + 1));
+            arrayList.add(randPosition);
+        }
+        return arrayList;
     }
 
     private synchronized void write(WHGPMessage message) throws IOException {

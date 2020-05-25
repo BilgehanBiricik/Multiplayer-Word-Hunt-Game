@@ -44,9 +44,9 @@ public class SetUpGame extends BorderPane {
     private int maxPoint;
     private int totalGame;
 
-    private ArrayList<Integer> unavailableTilesPositions = new ArrayList<>();
-    private ArrayList<Integer> x2TilesPositions = new ArrayList<>();
-    private ArrayList<Integer> x3TilesPositions = new ArrayList<>();
+//    private ArrayList<Integer> unavailableTilesPositions = new ArrayList<>();
+//    private ArrayList<Integer> x2TilesPositions = new ArrayList<>();
+//    private ArrayList<Integer> x3TilesPositions = new ArrayList<>();
 
     public SetUpGame(Stage parentStage) {
 
@@ -72,7 +72,7 @@ public class SetUpGame extends BorderPane {
                     whgpServer.start();
                     whgpClient = new WHGPClient(txtFieldIp.getText(), txtFieldPort.getText());
                     whgpClient.initializeGame(txtFieldUsername.getText(), new GameInfo(gameAreaX, gameAreaY, maxPoint, totalGame,
-                            unavailableTilesPositions, x2TilesPositions, x3TilesPositions));
+                            unavailableRegions, x2Tiles, x3Tiles));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -94,7 +94,7 @@ public class SetUpGame extends BorderPane {
         txtField3X.setText("5");
         txtField2X.setText("5");
         txtFieldUsername.setText("bilgehan");
-        txtFieldIp.setText("localhost");
+        txtFieldIp.setText("127.0.0.1");
         txtFieldPort.setText("5555");
 
         GridPane gridPane = new GridPane();
@@ -153,31 +153,21 @@ public class SetUpGame extends BorderPane {
         boolean checkSumOfSpecialTiles = (unavailableRegions + x3Tiles + x2Tiles) < gameArea;
         boolean checkSumOfGameAreaAxises = gameAreaX == gameAreaY;
 
-        if (!checkMaxPoint || !checkUnavailableRegions || !checkSumOfSpecialTiles || !checkSumOfGameAreaAxises)
+        if (!checkMaxPoint || !checkUnavailableRegions || !checkSumOfSpecialTiles || !checkSumOfGameAreaAxises) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+            alert.setHeaderText("Dikkat");
+            alert.setContentText("Max. puan, (oyun alanı - kullanılamayan bölgeler) sonucu oyun alanı değerinden küçük olmalı.\n" +
+                                    "Kullanılamayan bölgelerin sayısı oyun alanının %10'dan az olmalı.\n" +
+                                    "Özel alanların sayısı oyun alanından küçük olmalı.\n" +
+                                    "X ve Y alanları birbirine eşit olmalı.");
+            alert.show();
             return false;
+        }
 
         maxPoint = Integer.parseInt(txtFieldMaxPoint.getText());
         totalGame = Integer.parseInt(txtFieldTotalGame.getText());
 
-        unavailableTilesPositions = randomNumbersArray(unavailableRegions, gameArea);
-        x2TilesPositions = randomNumbersArray(x2Tiles, gameArea);
-        x3TilesPositions = randomNumbersArray(x3Tiles, gameArea);
-
         return true;
-    }
-
-    private ArrayList<Integer> randomNumbersArray(int length, int max) {
-        ArrayList<Integer> arrayList = new ArrayList<>();
-        for (int i = 0; i < length; i++) {
-            int randPosition = (int) (Math.random() * (max + 1));
-            while (arrayList.contains(randPosition)
-                    || unavailableTilesPositions.contains(randPosition)
-                    || x2TilesPositions.contains(randPosition)
-                    || x3TilesPositions.contains(randPosition)
-                    || (randPosition >= (gameAreaX * Math.ceil(gameAreaX / 2.0)) && randPosition <= (gameAreaX * Math.ceil(gameAreaX / 2.0) + gameAreaX)))
-                randPosition = (int) (Math.random() * (max + 1));
-            arrayList.add(randPosition);
-        }
-        return arrayList;
     }
 }

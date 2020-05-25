@@ -8,42 +8,29 @@ public class GameInfo implements Serializable {
     private int gameAreaY;
     private int maxPoint;
     private int totalGame;
+    private int unavailableTiles;
+    private int x2Tiles;
+    private int x3Tiles;
 
-    private ArrayList<Integer> unavailableTilesPositions;
-    private ArrayList<Integer> x2TilesPositions;
-    private ArrayList<Integer> x3TilesPositions;
 
     public GameInfo() {
         this.gameAreaX = 0;
         this.gameAreaY = 0;
         this.maxPoint = 0;
         this.totalGame = 0;
-        this.unavailableTilesPositions = new ArrayList<>();
-        this.x2TilesPositions = new ArrayList<>();
-        this.x3TilesPositions = new ArrayList<>();
+        this.unavailableTiles = 0;
+        this.x2Tiles = 0;
+        this.x3Tiles = 0;
     }
 
-    public GameInfo(int gameAreaX, int gameAreaY, int maxPoint, int totalGame, ArrayList<Integer> unavailableTilesPositions, ArrayList<Integer> x2TilesPositions, ArrayList<Integer> x3TilesPositions) {
+    public GameInfo(int gameAreaX, int gameAreaY, int maxPoint, int totalGame, int unavailableTiles, int x2Tiles, int x3Tiles) {
         this.gameAreaX = gameAreaX;
         this.gameAreaY = gameAreaY;
         this.maxPoint = maxPoint;
         this.totalGame = totalGame;
-        this.unavailableTilesPositions = unavailableTilesPositions;
-        this.x2TilesPositions = x2TilesPositions;
-        this.x3TilesPositions = x3TilesPositions;
-    }
-
-    public String printGameInfo() {
-        return gameAreaX + ";" + gameAreaY + ";" + maxPoint + ";" + totalGame + ";"
-                + arrayToString(unavailableTilesPositions) + ";" + arrayToString(x2TilesPositions) + ";"
-                + arrayToString(x3TilesPositions);
-    }
-
-    private String arrayToString(ArrayList<Integer> arrayList) {
-        StringBuilder s = new StringBuilder();
-        for (Integer i : arrayList)
-            s.append(i).append("#");
-        return s.toString();
+        this.unavailableTiles = unavailableTiles;
+        this.x2Tiles = x2Tiles;
+        this.x3Tiles = x3Tiles;
     }
 
     public int getGameAreaX() {
@@ -78,27 +65,27 @@ public class GameInfo implements Serializable {
         this.totalGame = totalGame;
     }
 
-    public ArrayList<Integer> getUnavailableTilesPositions() {
-        return unavailableTilesPositions;
+    public int getUnavailableTiles() {
+        return unavailableTiles;
     }
 
-    public void setUnavailableTilesPositions(ArrayList<Integer> unavailableTilesPositions) {
-        this.unavailableTilesPositions = unavailableTilesPositions;
+    public void setUnavailableTiles(int unavailableTiles) {
+        this.unavailableTiles = unavailableTiles;
     }
 
-    public ArrayList<Integer> getX2TilesPositions() {
-        return x2TilesPositions;
+    public int getX2Tiles() {
+        return x2Tiles;
     }
 
-    public void setX2TilesPositions(ArrayList<Integer> x2TilesPositions) {
-        this.x2TilesPositions = x2TilesPositions;
+    public void setX2Tiles(int x2Tiles) {
+        this.x2Tiles = x2Tiles;
     }
 
-    public ArrayList<Integer> getX3TilesPositions() {
-        return x3TilesPositions;
+    public int getX3Tiles() {
+        return x3Tiles;
     }
 
-    public void setX3TilesPositions(ArrayList<Integer> x3TilesPositions) {
-        this.x3TilesPositions = x3TilesPositions;
+    public void setX3Tiles(int x3Tiles) {
+        this.x3Tiles = x3Tiles;
     }
 }

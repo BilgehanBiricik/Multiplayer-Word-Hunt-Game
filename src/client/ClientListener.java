@@ -8,7 +8,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
-import server.Player;
 import utils.tile.Tile;
 import utils.tile.TileButton;
 import utils.message.WHGPMessage;
@@ -43,7 +42,9 @@ public class ClientListener extends Thread {
                             Platform.runLater(() ->
                             {
                                 WordHuntGame.getInstance().getListView().getItems().setAll(message.getPlayerList());
-                                if (clientName.equals("")) this.clientName = message.getMessage();
+                                if (clientName.equals("")) {
+                                  clientName = message.getMessage();
+                                }
                             });
                             break;
                         case PLAYER_LIST:
@@ -58,7 +59,8 @@ public class ClientListener extends Thread {
 
                                 wordHuntGameStage = new Stage();
                                 wordHuntGameStage.setScene(new Scene(WordHuntGame.getInstance().loadGameScene(), 1100, 900));
-                                wordHuntGameStage.setTitle("Kelime Avı Oyunu");
+
+                                wordHuntGameStage.setTitle(clientName + " - Kelime Avı Oyunu");
                                 wordHuntGameStage.show();
                                 wordHuntGameStage.setOnCloseRequest(windowEvent -> {
                                     try {
@@ -145,9 +147,9 @@ public class ClientListener extends Thread {
                                 alert.setHeaderText("Tur Bitti");
                                 alert.setContentText("Bu turu kazanan " + message.getMessage() + " adlı oyuncu oldu.");
                                 alert.show();
-                                alert.setOnCloseRequest(dialogEvent ->  {
+                                alert.setOnCloseRequest(dialogEvent -> {
                                     try {
-                                        whgpClient.resetGame(clientName.equals(message.getMessage()));
+                                        whgpClient.resetRound(clientName.equals(message.getMessage()));
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
@@ -161,7 +163,7 @@ public class ClientListener extends Thread {
                                 alert.setHeaderText(message.getMessageHeader());
                                 alert.setContentText(message.getMessage());
                                 alert.show();
-                                alert.setOnCloseRequest(dialogEvent ->  {
+                                alert.setOnCloseRequest(dialogEvent -> {
                                     wordHuntGameStage.close();
                                 });
                             });

@@ -114,15 +114,15 @@ public class WordHuntGame {
         gridPane.add(new Text("Oyun Alanı: "), 0, 2);
         gridPane.add(new Text(gameInfo.getGameAreaX() + "x" + gameInfo.getGameAreaY()), 1, 2);
         gridPane.add(new Text("Kullanılamaz Bölge Sayısı: "), 0, 3);
-        gridPane.add(new Text(String.valueOf(gameInfo.getUnavailableTilesPositions().size())), 1, 3);
+        gridPane.add(new Text(String.valueOf(gameInfo.getUnavailableTiles())), 1, 3);
         gridPane.add(new Text("Kazanma Puanı: "), 0, 4);
         gridPane.add(new Text(String.valueOf(gameInfo.getMaxPoint())), 1, 4);
         gridPane.add(new Text("Toplam Oyun: "), 0, 5);
         gridPane.add(new Text(String.valueOf(gameInfo.getTotalGame())), 1, 5);
         gridPane.add(new Text("2x Sayısı: "), 0, 6);
-        gridPane.add(new Text(String.valueOf(gameInfo.getX2TilesPositions().size())), 1, 6);
+        gridPane.add(new Text(String.valueOf(gameInfo.getX2Tiles())), 1, 6);
         gridPane.add(new Text("3x Sayısı: "), 0, 7);
-        gridPane.add(new Text(String.valueOf(gameInfo.getX3TilesPositions().size())), 1, 7);
+        gridPane.add(new Text(String.valueOf(gameInfo.getX3Tiles())), 1, 7);
 
         playerListPane.add(text2, 0, 0, 2, 1);
         playerListPane.add(listView, 0, 2, 2, 1);
