@@ -8,9 +8,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
+import utils.message.WHGPMessage;
 import utils.tile.Tile;
 import utils.tile.TileButton;
-import utils.message.WHGPMessage;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
